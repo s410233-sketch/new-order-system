@@ -3,80 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>園遊會點餐收銀系統-整合版</title>
+    <title>YLSH Science 5th - 園遊會收銀系統</title>
     <style>
         :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --success: #16a34a;
-            --success-hover: #15803d;
-            --danger: #dc2626;
-            --danger-hover: #b91c1c;
-            --warning: #d97706;
-            --bg-main: #f8fafc;
-            --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --primary-neon: #10b981; /* 螢光綠 / 湖水綠 */
+            --primary-hover: #059669;
+            --accent-blue: #38bdf8; /* 科技藍 */
+            --danger-neon: #f43f5e; /* 警示紅 */
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-glow: #334155;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Consolas', 'Courier New', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 100%);
+            color: var(--text-light);
             padding: 12px;
             padding-bottom: 60px;
+            min-height: 100vh;
         }
 
         header {
-            background: linear-gradient(135deg, #4f46e5, #6366f1);
-            color: white;
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            backdrop-filter: blur(8px);
+            color: var(--text-light);
+            padding: 18px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         header h1 {
-            font-size: 1.3rem;
-            margin-bottom: 4px;
+            font-size: 1.25rem;
+            letter-spacing: 1px;
+            color: var(--primary-neon);
+            text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
         }
 
         header p {
-            font-size: 0.8rem;
-            opacity: 0.9;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
         }
 
         .btn-toggle-view {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 0.95rem;
+            background: transparent;
+            color: var(--primary-neon);
+            border: 1px solid var(--primary-neon);
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 0.9rem;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
         }
 
         .btn-toggle-view:active {
-            background: rgba(255, 255, 255, 0.4);
+            background: var(--primary-neon);
+            color: var(--bg-dark);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
         }
 
         .grid-container {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 16px;
+            gap: 20px;
         }
 
         @media (min-width: 768px) {
@@ -90,72 +96,76 @@
 
         .card {
             background: var(--bg-card);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            padding: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border-glow);
+            padding: 18px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
         }
 
         .card-title {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: bold;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid var(--bg-main);
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #334155;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: var(--accent-blue);
         }
 
-        /* 商品菜單區 */
+        /* 矩陣商品菜單 */
         .menu-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 12px;
+            gap: 14px;
         }
 
         .menu-item {
-            background: var(--bg-card);
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            padding: 16px 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px 12px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.1s;
+            transition: all 0.15s ease-in-out;
             user-select: none;
         }
 
         .menu-item:active {
-            transform: scale(0.95);
-            background-color: #f1f5f9;
+            transform: scale(0.96);
+            border-color: var(--primary-neon);
+            background: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
         }
 
         .menu-item-name {
             font-weight: bold;
             font-size: 1.05rem;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            color: var(--text-light);
         }
 
         .menu-item-price {
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 0.95rem;
+            color: var(--primary-neon);
+            font-weight: bold;
+            font-size: 1rem;
         }
 
-        /* 購物車與點餐清單 */
+        /* 購物車區 */
         .cart-list {
             max-height: 280px;
             overflow-y: auto;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .cart-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+            border-bottom: 1px solid #334155;
         }
 
         .cart-item-info {
@@ -164,98 +174,106 @@
 
         .cart-item-name {
             font-weight: 500;
+            color: var(--text-light);
         }
 
         .cart-item-price {
             font-size: 0.85rem;
             color: var(--text-muted);
+            margin-top: 2px;
         }
 
         .quantity-control {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         .btn-qty {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: white;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: var(--text-light);
             font-size: 1.2rem;
-            font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.1s;
         }
 
         .btn-qty:active {
-            background: var(--bg-main);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
         }
 
         .cart-summary {
-            margin-top: 16px;
+            margin-top: 20px;
             padding-top: 16px;
-            border-top: 2px dashed var(--border);
+            border-top: 1px dashed #475569;
         }
 
         .total-row {
             display: flex;
             justify-content: space-between;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            color: var(--danger);
-            margin-bottom: 16px;
+            color: var(--danger-neon);
+            margin-bottom: 18px;
+            text-shadow: 0 0 10px rgba(244, 63, 94, 0.2);
         }
 
         .btn-submit {
             width: 100%;
-            background: var(--primary);
-            color: white;
+            background: var(--primary-neon);
+            color: var(--bg-dark);
             border: none;
             padding: 16px;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1.15rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
         }
 
         .btn-submit:active {
             background: var(--primary-hover);
+            transform: scale(0.98);
         }
 
-        /* 訂單佇列區 */
+        /* 數據與排單模組 */
         .order-queue {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 14px;
         }
 
         .order-card {
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 14px;
-            background: #fafafa;
-            border-left: 5px solid var(--warning);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 16px;
+            background: rgba(15, 23, 42, 0.4);
+            border-left: 4px solid var(--accent-blue);
         }
 
         .order-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .order-number {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             font-weight: bold;
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 4px 10px;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-blue);
+            padding: 4px 12px;
             border-radius: 6px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
         }
 
         .order-time {
@@ -264,66 +282,73 @@
         }
 
         .order-details {
-            font-size: 1rem;
-            margin-bottom: 10px;
-            color: #334155;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            color: #cbd5e1;
             white-space: pre-line;
-            background: #ffffff;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #f1f5f9;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #232d3f;
         }
 
         .order-actions {
             display: flex;
             justify-content: flex-end;
-            gap: 8px;
+            gap: 10px;
         }
 
         .btn-action {
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 8px 18px;
+            border-radius: 8px;
             border: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: bold;
             cursor: pointer;
+            transition: all 0.1s;
         }
 
         .btn-complete {
-            background: var(--success);
-            color: white;
+            background: var(--primary-neon);
+            color: var(--bg-dark);
         }
 
         .btn-complete:active {
-            background: var(--success-hover);
+            background: var(--primary-hover);
         }
 
         .btn-delete {
             background: transparent;
-            color: var(--danger);
-            border: 1px solid var(--danger);
+            color: var(--danger-neon);
+            border: 1px solid var(--danger-neon);
         }
 
-        /* 營收報表區 */
+        .btn-delete:active {
+            background: rgba(244, 63, 94, 0.1);
+        }
+
+        /* 報表網格 */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
+            gap: 14px;
+            margin-bottom: 20px;
         }
 
         .stat-box {
-            background: var(--bg-main);
-            padding: 14px;
-            border-radius: 8px;
+            background: #0f172a;
+            padding: 16px;
+            border-radius: 10px;
             text-align: center;
+            border: 1px solid #232d3f;
         }
 
         .stat-val {
             font-size: 1.5rem;
             font-weight: bold;
-            color: var(--primary);
-            margin-top: 4px;
+            color: var(--primary-neon);
+            margin-top: 6px;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
         }
 
         .rank-list {
@@ -334,30 +359,37 @@
         .rank-item {
             display: flex;
             justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px dashed var(--border);
+            padding: 8px 0;
+            border-bottom: 1px dashed #334155;
         }
 
-        /* 菜單編輯管理 */
+        /* 管理端表格 */
         .mgmt-form {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 16px;
         }
 
         .mgmt-input {
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
+            padding: 12px;
+            border: 1px solid #475569;
+            border-radius: 8px;
             font-size: 0.95rem;
+            background: #0f172a;
+            color: var(--text-light);
+        }
+
+        .mgmt-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
         }
 
         .btn-add-prod {
-            background: var(--primary);
-            color: white;
+            background: var(--accent-blue);
+            color: var(--bg-dark);
             border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
+            padding: 12px 18px;
+            border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
             white-space: nowrap;
@@ -367,17 +399,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.95rem;
+            padding: 10px 0;
+            border-bottom: 1px solid #334155;
         }
 
         .btn-remove-prod {
             background: none;
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 2px 8px;
-            border-radius: 4px;
+            border: 1px solid var(--danger-neon);
+            color: var(--danger-neon);
+            padding: 4px 10px;
+            border-radius: 6px;
             font-size: 0.8rem;
             cursor: pointer;
         }
@@ -386,8 +417,8 @@
             background: none;
             border: 1px solid var(--text-muted);
             color: var(--text-muted);
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 4px 10px;
+            border-radius: 6px;
             font-size: 0.8rem;
             cursor: pointer;
         }
@@ -395,11 +426,10 @@
         .empty-tips {
             text-align: center;
             color: var(--text-muted);
-            padding: 20px 0;
-            font-size: 0.95rem;
+            padding: 24px 0;
+            font-size: 0.9rem;
         }
 
-        /* 視窗切換隱藏屬性 */
         .view-section {
             display: none;
         }
@@ -413,81 +443,74 @@
 
     <header>
         <div>
-            <h1 id="headerTitle">🎪 園遊會點餐收銀系統 (前台)</h1>
-            <p id="headerSub">自動號碼牌 • 離線可用 • 工作人員專用</p>
+            <h1 id="headerTitle">🧬 YLSH Science 5th (前台點餐)</h1>
+            <p id="headerSub">宜中第五屆科學班 • 園遊會專用量子收銀系統</p>
         </div>
-        <button class="btn-toggle-view" id="btnToggle">⚙️ 切換後台</button>
+        <button class="btn-toggle-view" id="btnToggle">⚙️ 進入後台數據</button>
     </header>
 
-    <!-- ================= 前台點餐畫面 ================= -->
+    <!-- 前台點餐 -->
     <div id="frontView" class="view-section active">
         <div class="grid-container">
             <div class="card">
-                <div class="card-title">點選商品加入購物車</div>
-                <div class="menu-grid" id="menuGridFront">
-                    <!-- JS 動態渲染 -->
-                </div>
+                <div class="card-title">🔬 點選量子商品</div>
+                <div class="menu-grid" id="menuGridFront"></div>
                 
                 <div class="cart-summary">
-                    <div class="card-title" style="border:none; margin:0; padding:0 0 8px 0;">購物車清單</div>
+                    <div class="card-title" style="border:none; margin:0; padding:0 0 10px 0;">🛒 暫存點餐籃</div>
                     <div class="cart-list" id="cartListFront">
-                        <div class="empty-tips">購物車是空的，請點擊上方商品</div>
+                        <div class="empty-tips">點餐籃空無一物，請點選上方商品</div>
                     </div>
                     <div class="total-row">
-                        <span>總計金額</span>
+                        <span>能量總計</span>
                         <span id="totalPriceFront">NT$ 0</span>
                     </div>
-                    <button class="btn-submit" onclick="submitOrder()">確認送出，生成號碼牌</button>
+                    <button class="btn-submit" onclick="submitOrder()">發射訂單 🪐 生成號碼牌</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ================= 後台管理畫面 ================= -->
+    <!-- 後台數據 -->
     <div id="backView" class="view-section">
         <div class="grid-container">
             
-            <!-- 營收報表 -->
             <div class="card">
                 <div class="card-title">
-                    <span>📊 即時營收統計</span>
-                    <button class="btn-reset" onclick="resetAllData()">清除所有營運資料</button>
+                    <span>📊 核心營收觀測站</span>
+                    <button class="btn-reset" onclick="resetAllData()">全面重置實驗數據</button>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-box">
-                        <div style="font-size:0.85rem; color:var(--text-muted);">總營業額</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">總營業額</div>
                         <div class="stat-val" id="statRevenue">NT$ 0</div>
                     </div>
                     <div class="stat-box">
-                        <div style="font-size:0.85rem; color:var(--text-muted);">總訂單數</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">已接收波段 (總單數)</div>
                         <div class="stat-val" id="statOrderCount">0 單</div>
                     </div>
                 </div>
-                <div style="font-size: 0.95rem; font-weight: bold; margin-bottom: 6px;">熱銷排行榜：</div>
+                <div style="font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; color: var(--accent-blue);">🔥 元素熱銷排行：</div>
                 <ul class="rank-list" id="rankList">
-                    <div class="empty-tips" style="padding: 5px 0;">暫無銷售數據</div>
+                    <div class="empty-tips" style="padding: 5px 0;">暫無觀測 sales 資料</div>
                 </ul>
             </div>
 
-            <!-- 菜單管理（商品編輯） -->
             <div class="card">
-                <div class="card-title">🛠️ 菜單管理 (編輯商品)</div>
+                <div class="card-title">🛠️ 物質合成控制 (商品編輯)</div>
                 <div class="mgmt-form">
-                    <input type="text" id="newProdName" class="mgmt-input" placeholder="商品名稱" style="flex:2;">
-                    <input type="number" id="newProdPrice" class="mgmt-input" placeholder="金額" style="flex:1;">
-                    <button class="btn-add-prod" onclick="addNewProduct()">新增商品</button>
+                    <input type="text" id="newProdName" class="mgmt-input" placeholder="元素名稱" style="flex:2;">
+                    <input type="number" id="newProdPrice" class="mgmt-input" placeholder="單價" style="flex:1;">
+                    <button class="btn-add-prod" onclick="addNewProduct()">合成新增</button>
                 </div>
-                <div style="font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; color: var(--text-muted);">目前商品清單：</div>
-                <div id="mgmtProductList">
-                    <!-- JS 動態渲染 -->
-                </div>
+                <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; color: var(--text-muted);">現存元素列表：</div>
+                <div id="mgmtProductList"></div>
             </div>
 
-            <!-- 現場排單佇列 -->
             <div class="card full-width">
-                <div class="card-title">📋 現場排單佇列 (依號碼牌順序)</div>
+                <div class="card-title">📋 粒子反應排隊佇列 (現場排單)</div>
                 <div class="order-queue" id="orderQueueBack">
-                    <div class="empty-tips">目前沒有排隊中的訂單</div>
+                    <div class="empty-tips">無處於激發態的訂單</div>
                 </div>
             </div>
 
@@ -495,24 +518,20 @@
     </div>
 
     <script>
-        // 1. 預設商品菜單
         const defaultProducts = [
-            { id: 1, name: "珍珠奶茶", price: 60 },
-            { id: 2, name: "炸雞排", price: 70 },
-            { id: 3, name: "黃金薯條", price: 40 },
-            { id: 4, name: "古早味紅茶", price: 30 }
+            { id: 1, name: "科學珍奶", price: 60 },
+            { id: 2, name: "極客炸雞", price: 70 },
+            { id: 3, name: "量子薯條", price: 40 },
+            { id: 4, name: "反應堆紅茶", price: 30 }
         ];
 
-        // 2. 核心變數資料
         let products = JSON.parse(localStorage.getItem('bazaar_products')) || defaultProducts;
         let orders = JSON.parse(localStorage.getItem('bazaar_orders')) || [];
         let nextOrderNumber = parseInt(localStorage.getItem('bazaar_next_number')) || 1;
         let cart = {}; 
-        let currentView = 'front'; // front 或 back
+        let currentView = 'front';
 
-        // 3. 網頁載入初始化與事件綁定
         window.onload = function() {
-            // 使用強固型 JavaScript 事件監聽器確保按鈕切換一定成功
             document.getElementById('btnToggle').addEventListener('click', toggleView);
             renderAll();
         };
@@ -525,12 +544,10 @@
             renderMgmtProducts();
         }
 
-        // ================= 前台功能邏輯 =================
-
         function renderMenuFront() {
             const menuGrid = document.getElementById('menuGridFront');
             if (products.length === 0) {
-                menuGrid.innerHTML = '<div class="empty-tips">目前菜單沒有商品，請至後台新增！</div>';
+                menuGrid.innerHTML = '<div class="empty-tips">無商品，請至後台合成！</div>';
                 return;
             }
             menuGrid.innerHTML = products.map(p => `
@@ -542,30 +559,24 @@
         }
 
         function addToCart(productId) {
-            if (cart[productId]) {
-                cart[productId]++;
-            } else {
-                cart[productId] = 1;
-            }
+            cart[productId] = (cart[productId] || 0) + 1;
             renderCartFront();
         }
 
         function updateCartQty(productId, change) {
             if (!cart[productId]) return;
             cart[productId] += change;
-            if (cart[productId] <= 0) {
-                delete cart[productId];
-            }
+            if (cart[productId] <= 0) delete cart[productId];
             renderCartFront();
         }
 
         function renderCartFront() {
             const cartList = document.getElementById('cartListFront');
             const totalPriceEl = document.getElementById('totalPriceFront');
-            
             const cartKeys = Object.keys(cart);
+            
             if (cartKeys.length === 0) {
-                cartList.innerHTML = '<div class="empty-tips">購物車是空的，請點擊上方商品</div>';
+                cartList.innerHTML = '<div class="empty-tips">點餐籃空無一物，請點選上方商品</div>';
                 totalPriceEl.innerText = 'NT$ 0';
                 return;
             }
@@ -601,13 +612,11 @@
         function submitOrder() {
             const cartKeys = Object.keys(cart);
             if (cartKeys.length === 0) {
-                alert('購物車內沒有商品，請先點餐！');
+                alert('點餐籃空無一物！');
                 return;
             }
 
-            let details = [];
-            let total = 0;
-            let itemsArray = [];
+            let details = [], total = 0, itemsArray = [];
 
             cartKeys.forEach(id => {
                 const prod = products.find(p => p.id == id);
@@ -621,9 +630,9 @@
 
             const orderNumStr = '#' + String(nextOrderNumber).padStart(3, '0');
             const now = new Date();
-            const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+            const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
-            const newOrder = {
+            orders.push({
                 id: Date.now(),
                 numberStr: orderNumStr,
                 time: timeStr,
@@ -631,29 +640,24 @@
                 items: itemsArray,
                 totalPrice: total,
                 status: 'pending'
-            };
-
-            orders.push(newOrder);
+            });
             nextOrderNumber++;
 
             saveToLocalStorage();
-
             cart = {};
             renderCartFront();
             renderOrdersBack();
             updateStatsBack();
 
-            alert(`點餐成功！\n號碼牌為：${orderNumStr}\n總金額：NT$ ${total}`);
+            alert(`⚡ 激發成功！\n量子號碼牌：${orderNumStr}\n交收能量：NT$ ${total}`);
         }
-
-        // ================= 後台管理功能 =================
 
         function renderOrdersBack() {
             const orderQueue = document.getElementById('orderQueueBack');
             const pendingOrders = orders.filter(o => o.status === 'pending');
 
             if (pendingOrders.length === 0) {
-                orderQueue.innerHTML = '<div class="empty-tips">目前沒有排隊中的訂單</div>';
+                orderQueue.innerHTML = '<div class="empty-tips">無處於激發態的訂單</div>';
                 return;
             }
 
@@ -661,13 +665,13 @@
                 <div class="order-card">
                     <div class="order-header">
                         <span class="order-number">${o.numberStr}</span>
-                        <span class="order-time">下單時間 ${o.time}</span>
+                        <span class="order-time">時戳 ${o.time}</span>
                     </div>
                     <div class="order-details">${o.detailsText}</div>
-                    <div style="font-size:1rem; font-weight:bold; color:var(--danger); margin-bottom:10px;">金額: NT$ ${o.totalPrice}</div>
+                    <div style="font-size:0.95rem; font-weight:bold; color:var(--danger-neon); margin-bottom:12px;">能量值: NT$ ${o.totalPrice}</div>
                     <div class="order-actions">
-                        <button class="btn-action btn-delete" onclick="deleteOrder(${o.id})">刪除單</button>
-                        <button class="btn-action btn-complete" onclick="completeOrder(${o.id})">完成出餐</button>
+                        <button class="btn-action btn-delete" onclick="deleteOrder(${o.id})">湮滅單</button>
+                        <button class="btn-action btn-complete" onclick="completeOrder(${o.id})">完成釋放</button>
                     </div>
                 </div>
             `).join('');
@@ -684,7 +688,7 @@
         }
 
         function deleteOrder(orderId) {
-            if (confirm('確定要刪除這筆訂單嗎？營業額會被扣除喔。')) {
+            if (confirm('確定崩解此訂單？數據將扣除。')) {
                 orders = orders.filter(o => o.id !== orderId);
                 saveToLocalStorage();
                 renderOrdersBack();
@@ -693,8 +697,7 @@
         }
 
         function updateStatsBack() {
-            let totalRevenue = 0;
-            let productSales = {};
+            let totalRevenue = 0, productSales = {};
 
             orders.forEach(o => {
                 totalRevenue += o.totalPrice;
@@ -706,11 +709,9 @@
             document.getElementById('statRevenue').innerText = `NT$ ${totalRevenue}`;
             document.getElementById('statOrderCount').innerText = `${orders.length} 單`;
 
-            const sortedSales = Object.keys(productSales).map(name => {
-                return { name: name, qty: productSales[name] };
-            }).sort((a, b) => b.qty - a.qty);
-
+            const sortedSales = Object.keys(productSales).map(name => ({ name, qty: productSales[name] })).sort((a, b) => b.qty - a.qty);
             const rankList = document.getElementById('rankList');
+            
             if (sortedSales.length === 0) {
                 rankList.innerHTML = '<div class="empty-tips" style="padding: 5px 0;">暫無銷售數據</div>';
                 return;
@@ -719,70 +720,48 @@
             rankList.innerHTML = sortedSales.map((item, index) => `
                 <li class="rank-item">
                     <span>${index + 1}. ${item.name}</span>
-                    <span style="font-weight:bold; color:var(--primary);">${item.qty} 份</span>
+                    <span style="font-weight:bold; color:var(--primary-neon);">${item.qty} 份</span>
                 </li>
             `).join('');
         }
 
         function addNewProduct() {
-            const nameInput = document.getElementById('newProdName');
-            const priceInput = document.getElementById('newProdPrice');
-            const name = nameInput.value.trim();
-            const price = parseInt(priceInput.value);
+            const nameInput = document.getElementById('newProdName'), priceInput = document.getElementById('newProdPrice');
+            const name = nameInput.value.trim(), price = parseInt(priceInput.value);
 
-            if (!name || isNaN(price) || price < 0) {
-                alert('請輸入正確的商品名稱與價格！');
-                return;
-            }
+            if (!name || isNaN(price) || price < 0) return alert('元素合成資訊錯誤！');
 
-            if (confirm(`確定要新增商品「${name}」價格為 ${price} 元嗎？`)) {
-                const newProd = {
-                    id: Date.now(),
-                    name: name,
-                    price: price
-                };
-                products.push(newProd);
+            if (confirm(`確定要合成新元素「${name}」？`)) {
+                products.push({ id: Date.now(), name, price });
                 localStorage.setItem('bazaar_products', JSON.stringify(products));
-                
-                nameInput.value = '';
-                priceInput.value = '';
-                
-                renderMenuFront();
-                renderMgmtProducts();
+                nameInput.value = ''; priceInput.value = '';
+                renderMenuFront(); renderMgmtProducts();
             }
         }
 
         function removeProduct(productId) {
             const prod = products.find(p => p.id === productId);
-            if (!prod) return;
-
-            if (confirm(`確定要將「${prod.name}」從菜單中移除嗎？\n(注意：前台按鈕將會立刻消失)`)) {
+            if (prod && confirm(`確定崩解「${prod.name}」？前台按鈕將消失。`)) {
                 products = products.filter(p => p.id !== productId);
                 localStorage.setItem('bazaar_products', JSON.stringify(products));
-                
                 cart = {};
-                
-                renderMenuFront();
-                renderCartFront();
-                renderMgmtProducts();
+                renderMenuFront(); renderCartFront(); renderMgmtProducts();
             }
         }
 
         function renderMgmtProducts() {
             const listEl = document.getElementById('mgmtProductList');
             if (products.length === 0) {
-                listEl.innerHTML = '<div class="empty-tips" style="padding:10px 0;">目前無任何商品</div>';
+                listEl.innerHTML = '<div class="empty-tips" style="padding:10px 0;">無存在元素</div>';
                 return;
             }
             listEl.innerHTML = products.map(p => `
                 <div class="mgmt-list-item">
                     <span><strong>${p.name}</strong> (NT$ ${p.price})</span>
-                    <button class="btn-remove-prod" onclick="removeProduct(${p.id})">刪除商品</button>
+                    <button class="btn-remove-prod" onclick="removeProduct(${p.id})">崩解元素</button>
                 </div>
             `).join('');
         }
-
-        // ================= 核心設定與切換邏輯 =================
 
         function saveToLocalStorage() {
             localStorage.setItem('bazaar_orders', JSON.stringify(orders));
@@ -790,41 +769,29 @@
         }
 
         function toggleView() {
-            const frontView = document.getElementById('frontView');
-            const backView = document.getElementById('backView');
-            const btnToggle = document.getElementById('btnToggle');
-            const headerTitle = document.getElementById('headerTitle');
+            const frontView = document.getElementById('frontView'), backView = document.getElementById('backView');
+            const btnToggle = document.getElementById('btnToggle'), headerTitle = document.getElementById('headerTitle');
 
             if (currentView === 'front') {
                 currentView = 'back';
-                frontView.classList.remove('active');
-                backView.classList.add('active');
-                btnToggle.innerText = '📱 回到前台';
-                btnToggle.style.background = '#16a34a'; 
-                headerTitle.innerText = '🎪 園遊會點餐收銀系統 (後台管理)';
+                frontView.classList.remove('active'); backView.classList.add('active');
+                btnToggle.innerText = '📱 回到量子前台';
+                headerTitle.innerText = '🧬 YLSH Science 5th (後台觀測)';
                 renderAll(); 
             } else {
                 currentView = 'front';
-                backView.classList.remove('active');
-                frontView.classList.add('active');
-                btnToggle.innerText = '⚙️ 切換後台';
-                btnToggle.style.background = 'rgba(255, 255, 255, 0.2)';
-                headerTitle.innerText = '🎪 園遊會點餐收銀系統 (前台)';
+                backView.classList.remove('active'); frontView.classList.add('active');
+                btnToggle.innerText = '⚙️ 進入後台數據';
+                headerTitle.innerText = '🧬 YLSH Science 5th (前台點餐)';
             }
         }
 
         function resetAllData() {
-            if (confirm('⚠️ 警告：這將會完全刪除所有的歷史訂單、排單佇列與營收統計！號碼牌會回到 #001。確定要清除嗎？')) {
-                localStorage.removeItem('bazaar_orders');
-                localStorage.removeItem('bazaar_next_number');
-                orders = [];
-                nextOrderNumber = 1;
-                cart = {};
-                
-                renderCartFront();
-                renderOrdersBack();
-                updateStatsBack();
-                alert('系統數據已成功清空！');
+            if (confirm('⚠️ 警告：這將會完全湮滅所有實驗數據！確定清除？')) {
+                localStorage.removeItem('bazaar_orders'); localStorage.removeItem('bazaar_next_number');
+                orders = []; nextOrderNumber = 1; cart = {};
+                renderCartFront(); renderOrdersBack(); updateStatsBack();
+                alert('數據已徹底清空！');
             }
         }
     </script>
