@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>園遊會點餐收銀系統 - 優惠組合版</title>
+    <title>園遊會高效收銀、出餐與成本利潤系統</title>
     <style>
         :root {
             --bg-main: #f8fafc;
             --bg-card: #ffffff;
-            --primary-blue: #e0f2fe; /* 淺藍招牌底色 */
+            --primary-blue: #e0f2fe;
             --text-dark: #1e293b;
             --text-muted: #64748b;
-            --accent-blue: #0284c7; /* 深藍色按鈕 */
+            --accent-blue: #0284c7;
             --danger-red: #ef4444;
             --success-green: #16a34a;
+            --warning-orange: #f97316;
+            --purple-cost: #8b5cf6;
             --border-color: #cbd5e1;
         }
 
@@ -21,7 +23,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -36,71 +38,55 @@
         header {
             background-color: var(--primary-blue);
             border: 1px solid #bae6fd;
-            padding: 18px;
+            padding: 14px;
             border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
-        header h1 {
-            font-size: 1.3rem;
-            color: #0369a1;
-        }
+        .header-info h1 { font-size: 1.1rem; color: #0369a1; }
+        .header-info p { font-size: 0.75rem; color: #0c4a6e; }
 
-        header p {
-            font-size: 0.8rem;
-            color: #0c4a6e;
-            margin-top: 2px;
-        }
-
-        .btn-toggle-view {
-            background: #ffffff;
-            color: var(--accent-blue);
-            border: 1px solid var(--accent-blue);
-            padding: 10px 166x;
-            padding: 10px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+        /* 下拉選單樣式 */
+        .view-selector {
+            padding: 8px 12px;
+            font-size: 0.95rem;
             font-weight: bold;
+            border-radius: 8px;
+            border: 1px solid var(--accent-blue);
+            background-color: #ffffff;
+            color: var(--accent-blue);
             cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-toggle-view:active {
-            background: var(--accent-blue);
-            color: #ffffff;
+            outline: none;
         }
 
         .grid-container {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 15px;
         }
 
         @media (min-width: 768px) {
-            .grid-container {
-                grid-template-columns: 1.2fr 0.8fr;
-            }
-            .full-width {
-                grid-column: span 2;
-            }
+            .grid-container { grid-template-columns: 1.2fr 0.8fr; }
+            .full-width { grid-column: span 2; }
         }
 
         .card {
             background: var(--bg-card);
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            padding: 18px;
+            padding: 16px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            margin-bottom: 15px;
         }
 
         .card-title {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: bold;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             padding-bottom: 8px;
             border-bottom: 2px solid var(--primary-blue);
             display: flex;
@@ -109,441 +95,199 @@
             color: #0369a1;
         }
 
-        /* 商品菜單 */
+        /* 菜單 & 售完狀態 */
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
         }
 
         .menu-item {
             background: #f1f5f9;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
-            padding: 18px 10px;
+            padding: 15px 8px;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.1s, background-color 0.1s;
             user-select: none;
         }
 
-        .menu-item:active {
+        .menu-item:active:not(.sold-out) {
             transform: scale(0.95);
             background-color: var(--primary-blue);
-            border-color: #bae6fd;
         }
 
-        .menu-item-name {
-            font-weight: bold;
-            font-size: 1rem;
-            margin-bottom: 6px;
+        .menu-item.sold-out {
+            background: #cbd5e1;
+            border-color: #94a3b8;
+            color: #94a3b8;
+            cursor: not-allowed;
         }
 
-        .menu-item-price {
-            color: var(--accent-blue);
-            font-weight: bold;
-        }
-
-        .menu-item-promo-tag {
-            font-size: 0.75rem;
-            color: var(--success-green);
-            margin-top: 4px;
-            font-weight: bold;
-        }
+        .menu-item-name { font-weight: bold; font-size: 0.95rem; margin-bottom: 4px; }
+        .menu-item-price { color: var(--accent-blue); font-weight: bold; }
+        .menu-item.sold-out .menu-item-price { color: #94a3b8; }
+        .menu-item-promo-tag { font-size: 0.7rem; color: var(--success-green); margin-top: 4px; font-weight: bold; }
 
         /* 購物車 */
-        .cart-list {
-            max-height: 280px;
-            overflow-y: auto;
-            margin-bottom: 14px;
-        }
-
-        .cart-item {
-            padding: 10px 0;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .cart-item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .cart-item-name {
-            font-weight: 500;
-        }
-
-        .cart-item-price {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-
+        .cart-list { max-height: 240px; overflow-y: auto; margin-bottom: 12px; }
+        .cart-item { padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
+        .cart-item-row { display: flex; justify-content: space-between; align-items: center; }
         .promo-alert-text {
-            color: var(--danger-red);
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-top: 4px;
-            background: #fef2f2;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid #fca5a5;
-            display: inline-block;
+            color: var(--danger-red); font-size: 0.75rem; font-weight: bold; margin-top: 4px;
+            background: #fef2f2; padding: 4px 6px; border-radius: 4px; border: 1px solid #fca5a5; display: inline-block;
         }
 
-        .quantity-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .quantity-control { display: flex; align-items: center; gap: 8px; }
+        .btn-qty { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-color); background: #ffffff; cursor: pointer; }
 
-        .btn-qty {
-            width: 30px;
-            height: 30px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background: #ffffff;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* 折扣輸入框 */
         .discount-section {
-            margin-top: 14px;
-            padding: 12px;
-            background: #f8fafc;
-            border-radius: 8px;
-            border: 1px dashed var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
+            margin-top: 12px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px dashed var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
         }
+        .discount-input { width: 80px; padding: 5px; border: 1px solid var(--border-color); border-radius: 6px; text-align: center; }
 
-        .discount-input {
-            width: 90px;
-            padding: 6px 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            text-align: center;
-        }
+        .cart-summary { margin-top: 12px; padding-top: 12px; border-top: 2px dashed var(--border-color); }
+        .summary-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 4px; }
+        .total-row { display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: bold; color: var(--danger-red); margin-top: 6px; margin-bottom: 12px; }
+        .btn-submit { width: 100%; background: var(--accent-blue); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
 
-        .cart-summary {
-            margin-top: 14px;
-            padding-top: 14px;
-            border-top: 2px dashed var(--border-color);
-        }
+        /* 現場排單 */
+        .order-card { border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; background: #ffffff; border-left: 5px solid var(--accent-blue); margin-bottom: 12px; }
+        .order-card.partial { border-left-color: var(--warning-orange); }
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .order-number { font-size: 0.95rem; font-weight: bold; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 5px; }
+        .order-details { font-size: 0.9rem; margin-bottom: 8px; color: var(--text-dark); white-space: pre-line; background: #f8fafc; padding: 8px; border-radius: 6px; }
+        .order-actions { display: flex; justify-content: flex-end; gap: 8px; }
+        .btn-action { padding: 6px 12px; border-radius: 6px; border: none; font-size: 0.8rem; font-weight: bold; cursor: pointer; }
+        .btn-complete { background: var(--success-green); color: white; }
+        .btn-partial { background: var(--warning-orange); color: white; }
 
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
+        /* 彈出視窗 */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 15px; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; padding: 20px; border-radius: 12px; max-width: 400px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .modal-title { font-weight: bold; margin-bottom: 12px; color: #0369a1; font-size: 1.1rem; }
+        .modal-item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #e2e8f0; }
 
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--danger-red);
-            margin-top: 8px;
-            margin-bottom: 14px;
-        }
+        /* 後台控制 */
+        .test-menu-container { position: relative; display: inline-block; }
+        .btn-test-menu-toggle { background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
+        .test-menu-dropdown { display: none; position: absolute; right: 0; top: 110%; background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 100; min-width: 130px; }
+        .test-menu-dropdown.show { display: block; }
 
-        .btn-submit {
-            width: 100%;
-            background: var(--accent-blue);
-            color: #ffffff;
-            border: none;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+        .stat-box { background: #f1f5f9; padding: 10px 4px; border-radius: 8px; text-align: center; }
+        .stat-val { font-size: 1.1rem; font-weight: bold; color: #0369a1; margin-top: 2px; }
+        .mgmt-box { background: #f8fafc; border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+        .mgmt-row { display: flex; gap: 6px; margin-bottom: 6px; }
+        .mgmt-input { padding: 6px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.85rem; }
+        .mgmt-list-item { border-bottom: 1px solid #f1f5f9; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        
+        .btn-status-toggle { padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-color); font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+        .btn-status-toggle.normal { background: #e2f5e9; color: var(--success-green); border-color: #bbf7d0; }
+        .btn-status-toggle.soldout { background: #fee2e2; color: var(--danger-red); border-color: #fecaca; }
 
-        /* 後台排單 */
-        .order-queue {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .btn-mgmt-action { background: none; border: 1px solid var(--border-color); font-size: 0.75rem; padding: 4px 6px; margin-left: 4px; border-radius: 4px; cursor: pointer; }
 
-        .order-card {
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 14px;
-            background: #ffffff;
-            border-left: 4px solid var(--accent-blue);
-        }
+        .empty-tips { text-align: center; color: var(--text-muted); padding: 15px 0; font-size: 0.85rem; }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
 
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .order-number {
-            font-size: 1rem;
-            font-weight: bold;
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 3px 10px;
-            border-radius: 5px;
-        }
-
-        .order-time {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .order-details {
-            font-size: 0.95rem;
-            margin-bottom: 10px;
-            color: var(--text-dark);
-            white-space: pre-line;
-            background: #f8fafc;
-            padding: 8px;
-            border-radius: 6px;
-        }
-
-        .order-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-        }
-
-        .btn-action {
-            padding: 6px 14px;
-            border-radius: 6px;
-            border: none;
-            font-size: 0.85rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .btn-complete {
-            background: #22c55e;
-            color: white;
-        }
-
-        .btn-delete {
-            background: transparent;
-            color: var(--danger-red);
-            border: 1px solid var(--danger-red);
-        }
-
-        /* 統計區 */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .stat-box {
-            background: #f1f5f9;
-            padding: 12px 6px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .stat-val {
-            font-size: 1.15rem;
-            font-weight: bold;
-            color: #0369a1;
-            margin-top: 4px;
-        }
-
-        .rank-list {
-            font-size: 0.9rem;
-            list-style: none;
-        }
-
-        .rank-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px dashed var(--border-color);
-        }
-
-        /* 商品管理進階表單 */
-        .mgmt-box {
-            background: #f8fafc;
-            border: 1px solid var(--border-color);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 14px;
-        }
-
-        .mgmt-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .mgmt-input {
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-
-        .mgmt-promo-group {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .mgmt-promo-input {
-            width: 50px;
-            padding: 4px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .btn-add-prod {
-            background: var(--accent-blue);
-            color: white;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .mgmt-list-item {
-            border-bottom: 1px solid #f1f5f9;
-            padding: 10px 0;
-        }
-
-        .mgmt-list-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .mgmt-list-promo {
-            font-size: 0.8rem;
-            color: var(--success-green);
-            margin-top: 2px;
-            font-weight: bold;
-        }
-
-        .empty-tips {
-            text-align: center;
-            color: var(--text-muted);
-            padding: 20px 0;
-            font-size: 0.9rem;
-        }
-
-        .view-section {
-            display: none;
-        }
-
-        .view-section.active {
-            display: block;
-        }
+        /* 成本與利潤專屬樣式 */
+        .cost-list-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+        .cost-list-table th, .cost-list-table td { padding: 8px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        .cost-list-table th { background-color: #f1f5f9; color: var(--text-dark); }
+        .profit-card { background: linear-gradient(135deg, #f5f3ff 0%, #edd8ff 100%); border: 1px solid #ddd6fe; border-radius: 12px; padding: 16px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
     <header>
-        <div>
-            <h1 id="headerTitle">🎪 園遊會收銀系統 (前台點餐)</h1>
-            <p id="headerSub">支援固定組合優惠與自訂手工折價</p>
+        <div class="header-info">
+            <h1 id="headerTitle">🎪 園遊會管理調度中心</h1>
+            <p>數據即時保存於本地，支援部分出餐、靈活改價與利潤分析</p>
         </div>
-        <button class="btn-toggle-view" id="btnToggle">⚙️ 進入後台數據</button>
+        <!-- 畫面切換下拉式選單 -->
+        <select class="view-selector" id="viewSelector" onchange="switchView(this.value)">
+            <option value="front">📱 前台點餐</option>
+            <option value="kitchen">🍳 現場排單 (出餐確認)</option>
+            <option value="back">⚙️ 後台管理</option>
+            <option value="cost">💰 成本管理</option>
+        </select>
     </header>
 
-    <!-- 前台點餐 -->
-    <div id="frontView" class="view-section active">
+    <!-- 1. 前台點餐畫面 -->
+    <div id="view-front" class="view-section active">
         <div class="grid-container">
             <div class="card">
                 <div class="card-title">🛍️ 點選商品</div>
                 <div class="menu-grid" id="menuGridFront"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">🛒 當前點餐籃</div>
+                <div class="cart-list" id="cartListFront"></div>
                 
+                <div class="discount-section">
+                    <span style="font-size:0.85rem; font-weight:bold; color:var(--text-muted);">🎁 臨時手動折價</span>
+                    <div>
+                        <span style="color:var(--text-muted); font-size:0.85rem;">減 NT$</span>
+                        <input type="number" id="cartManualDiscount" class="discount-input" placeholder="0" min="0" oninput="renderCartFront()">
+                    </div>
+                </div>
+
                 <div class="cart-summary">
-                    <div class="card-title" style="border:none; margin:0; padding:0 0 8px 0;">🛒 當前點餐籃</div>
-                    <div class="cart-list" id="cartListFront">
-                        <div class="empty-tips">點餐籃是空的，請點擊上方商品</div>
-                    </div>
-
-                    <!-- 手動折價區 -->
-                    <div class="discount-section">
-                        <span style="font-size:0.9rem; font-weight:bold; color:var(--text-muted);">🎁 臨時手動折價 (隨機彈性)</span>
-                        <div>
-                            <span style="color:var(--text-muted); font-size:0.9rem; margin-right:2px;">減 NT$</span>
-                            <input type="number" id="cartManualDiscount" class="discount-input" placeholder="0" min="0" oninput="renderCartFront()">
-                        </div>
-                    </div>
-
-                    <div class="cart-summary" style="margin-top: 14px; padding-top: 10px;">
-                        <div class="summary-row">
-                            <span>商品原價小計</span>
-                            <span id="subtotalPrice">NT$ 0</span>
-                        </div>
-                        <div class="summary-row" style="color: var(--success-green);">
-                            <span>固定組合優惠扣除</span>
-                            <span id="autoDiscountPrice">-NT$ 0</span>
-                        </div>
-                        <div class="summary-row" style="color: #b45309;">
-                            <span>臨時手動折價扣除</span>
-                            <span id="manualDiscountPrice">-NT$ 0</span>
-                        </div>
-                        <div class="total-row">
-                            <span>實收總計</span>
-                            <span id="totalPriceFront">NT$ 0</span>
-                        </div>
-                        <button class="btn-submit" onclick="submitOrder()">送出訂單 ➡️ 生成號碼牌</button>
-                    </div>
+                    <div class="summary-row"><span>商品原價小計</span><span id="subtotalPrice">NT$ 0</span></div>
+                    <div class="summary-row" style="color: var(--success-green);"><span>固定組合優惠扣除</span><span id="autoDiscountPrice">-NT$ 0</span></div>
+                    <div class="summary-row" style="color: #b45309;"><span>臨時手動折價扣除</span><span id="manualDiscountPrice">-NT$ 0</span></div>
+                    <div class="total-row"><span>實收總計</span><span id="totalPriceFront">NT$ 0</span></div>
+                    <button class="btn-submit" onclick="submitOrder()">送出訂單 ➡️ 生成號碼牌</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 後台數據 -->
-    <div id="backView" class="view-section">
+    <!-- 2. 現場排單畫面 -->
+    <div id="view-kitchen" class="view-section">
+        <div class="card full-width">
+            <div class="card-title">📋 現場出餐排單佇列 (出餐專用平板看這裡)</div>
+            <div id="orderQueueKitchen"></div>
+        </div>
+    </div>
+
+    <!-- 3. 後台數據與商品編輯 -->
+    <div id="view-back" class="view-section">
         <div class="grid-container">
-            
             <div class="card">
                 <div class="card-title">
                     <span>📊 營收帳目分析表</span>
-                    <button class="btn-reset" onclick="resetAllData()">清空全天數據</button>
+                    <div class="test-menu-container">
+                        <button class="btn-test-menu-toggle" onclick="toggleTestMenu(event)">⚙️ 測試功能</button>
+                        <div class="test-menu-dropdown" id="testMenuDropdown">
+                            <button style="background:var(--danger-red); color:white; border:none; padding:6px; border-radius:4px; font-size:0.8rem; width:100%; cursor:pointer;" onclick="resetAllData()">💥 清空全天數據</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-box" style="grid-column: span 3; background: #e0f2fe;">
-                        <div style="font-size:0.8rem; font-weight:bold; color:#0369a1;">實收總營業額 (已扣所有折價)</div>
-                        <div class="stat-val" id="statRevenue" style="font-size:1.6rem; color:var(--danger-red);">NT$ 0</div>
+                        <div style="font-size:0.8rem; font-weight:bold; color:#0369a1;">實收總營業額 (已自動扣減未出餐/折價)</div>
+                        <div class="stat-val" id="statRevenue" style="font-size:1.5rem; color:var(--danger-red);">NT$ 0</div>
                     </div>
                     <div class="stat-box">
-                        <div style="font-size:0.75rem; color:var(--text-muted);">總訂單數</div>
+                        <div style="font-size:0.7rem; color:var(--text-muted);">總訂單數</div>
                         <div class="stat-val" id="statOrderCount">0 單</div>
                     </div>
                     <div class="stat-box">
-                        <div style="font-size:0.75rem; color:var(--success-green); font-weight:500;">累積組合優惠</div>
+                        <div style="font-size:0.7rem; color:var(--success-green);">累積組合優惠</div>
                         <div class="stat-val" id="statAutoDiscount" style="color:var(--success-green);">NT$ 0</div>
                     </div>
                     <div class="stat-box">
-                        <div style="font-size:0.75rem; color:#b45309; font-weight:500;">累積手動折價</div>
+                        <div style="font-size:0.7rem; color:#b45309;">累積手動折價</div>
                         <div class="stat-val" id="statManualDiscount" style="color:#b45309;">NT$ 0</div>
                     </div>
                 </div>
-                <div style="font-size: 0.9rem; font-weight: bold; margin-bottom: 6px; color: var(--accent-blue);">🔥 商品銷量排行：</div>
-                <ul class="rank-list" id="rankList">
-                    <div class="empty-tips" style="padding: 5px 0;">暫無銷售數據</div>
-                </ul>
+                <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: var(--accent-blue);">🔥 實質商品銷量排行(已扣故障未出餐)：</div>
+                <ul class="rank-list" id="rankList" style="font-size:0.85rem; list-style:none;"></ul>
             </div>
 
             <div class="card">
@@ -553,409 +297,490 @@
                         <input type="text" id="newProdName" class="mgmt-input" placeholder="商品名稱" style="flex:2;">
                         <input type="number" id="newProdPrice" class="mgmt-input" placeholder="單價" style="flex:1;">
                     </div>
-                    <div class="mgmt-row mgmt-promo-group">
-                        <span>🎁 組合優惠：每買</span>
-                        <input type="number" id="newProdPromoQty" class="mgmt-promo-input" placeholder="0" min="0">
-                        <span>個，就直接折扣</span>
-                        <input type="number" id="newProdPromoMinus" class="mgmt-promo-input" placeholder="0" min="0">
-                        <span>元 (無則填0)</span>
+                    <div class="mgmt-row" style="font-size:0.8rem; align-items:center; color:var(--text-muted);">
+                        <span>每買</span><input type="number" id="newProdPromoQty" style="width:40px;" class="mgmt-input">
+                        <span>個，折</span><input type="number" id="newProdPromoMinus" style="width:50px;" class="mgmt-input"><span>元</span>
                     </div>
-                    <button class="btn-add-prod" onclick="addNewProduct()">新增此品項</button>
+                    <button class="btn-submit" style="padding:6px; font-size:0.85rem;" onclick="addNewProduct()">新增此品項</button>
                 </div>
-                <div style="font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: var(--text-muted);">目前商品清單：</div>
                 <div id="mgmtProductList"></div>
             </div>
+        </div>
+    </div>
 
-            <div class="card full-width">
-                <div class="card-title">📋 現場排單佇列 (未出餐)</div>
-                <div class="order-queue" id="orderQueueBack">
-                    <div class="empty-tips">目前沒有排隊中的訂單</div>
+    <!-- 4. 成本管理畫面 -->
+    <div id="view-cost" class="view-section">
+        <div class="grid-container">
+            <div class="card">
+                <div class="card-title" style="color: var(--purple-cost);">📥 輸入支出項目</div>
+                <div class="mgmt-box">
+                    <div class="mgmt-row">
+                        <input type="text" id="costItemName" class="mgmt-input" placeholder="花費品項明細 (如：買冰塊、租卡式爐)" style="flex:2;">
+                        <input type="number" id="costItemAmount" class="mgmt-input" placeholder="金額" style="flex:1;">
+                    </div>
+                    <button class="btn-submit" style="background: var(--purple-cost); padding:8px; font-size:0.9rem;" onclick="addCostItem()">新增此筆成本</button>
+                </div>
+
+                <div style="font-weight: bold; margin-top: 15px; color: var(--text-dark);">💰 歷史成本支出清單</div>
+                <table class="cost-list-table">
+                    <thead>
+                        <tr>
+                            <th>品項明細</th>
+                            <th>花費金額</th>
+                            <th style="width: 60px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="costTableBody"></tbody>
+                </table>
+                <div style="text-align: right; margin-top: 10px; font-weight: bold; color: var(--purple-cost);" id="costTotalText">
+                    成本花費總計：NT$ 0
                 </div>
             </div>
 
+            <div class="card">
+                <div class="card-title" style="color: var(--success-green);">📊 經營分析大盤</div>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 15px;">隨時點擊下方按鈕，掌握攤位的最即時賺賠狀況！</p>
+                <button class="btn-submit" style="background: var(--success-green); padding: 12px; font-size: 1.1rem;" onclick="calculateProfit()">📈 即時利潤計算</button>
+                
+                <div class="profit-card" id="profitReportCard" style="display: none;">
+                    <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; color: #5b21b6; border-bottom: 1px solid #ddd6fe; padding-bottom: 5px;">📊 攤位財務損益報告</div>
+                    <div style="margin-bottom: 6px;">🟢 實收營業額：<strong id="reportRevenue" style="color: var(--danger-red);">NT$ 0</strong></div>
+                    <div style="margin-bottom: 6px;">🟣 成本總支出：<strong id="reportCost">NT$ 0</strong></div>
+                    <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 8px 0;">
+                    <div style="font-size: 1.2rem; font-weight: bold; margin-bottom: 4px;">🔥 淨利潤：<span id="reportNetProfit">NT$ 0</span></div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">投資報酬率 (ROI)：<span id="reportROI">0%</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 部分出餐應變彈出視窗 -->
+    <div class="modal" id="partialModal">
+        <div class="modal-content">
+            <div class="modal-title">⚠️ 故障部分出餐設定</div>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">請勾選並輸入「臨時出問題、無法出給客人」的品項數量。系統會保留紀錄，但自動將營業額扣除退回。</p>
+            <div id="modalItemsList"></div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
+                <button class="btn-action" style="background:#cbd5e1;" onclick="closePartialModal()">取消</button>
+                <button class="btn-action" style="background:var(--warning-orange); color:white;" onclick="submitPartialOrder()">確認扣除並出餐</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // 預設預載糖葫蘆特惠
         const defaultProducts = [
-            { id: 1, name: "糖葫蘆", price: 35, promoQty: 3, promoMinus: 5 },
-            { id: 2, name: "炒麵", price: 60, promoQty: 0, promoMinus: 0 },
-            { id: 3, name: "紅茶", price: 25, promoQty: 0, promoMinus: 0 }
+            { id: 1, name: "糖葫蘆", price: 35, promoQty: 3, promoMinus: 5, isSoldOut: false, isPriceChanged: false },
+            { id: 2, name: "炒麵", price: 60, promoQty: 0, promoMinus: 0, isSoldOut: false, isPriceChanged: false },
+            { id: 3, name: "紅茶", price: 25, promoQty: 0, promoMinus: 0, isSoldOut: false, isPriceChanged: false }
         ];
 
-        let products = JSON.parse(localStorage.getItem('bazaar_products2')) || defaultProducts;
-        let orders = JSON.parse(localStorage.getItem('bazaar_orders2')) || [];
-        let nextOrderNumber = parseInt(localStorage.getItem('bazaar_next_number2')) || 1;
+        let products = JSON.parse(localStorage.getItem('bazaar_products4')) || defaultProducts;
+        let orders = JSON.parse(localStorage.getItem('bazaar_orders4')) || [];
+        let costItems = JSON.parse(localStorage.getItem('bazaar_costs4')) || [];
+        let nextOrderNumber = parseInt(localStorage.getItem('bazaar_next_number4')) || 1;
         let cart = {}; 
-        let currentView = 'front';
+        let currentActiveOrderId = null;
 
         window.onload = function() {
-            document.getElementById('btnToggle').addEventListener('click', toggleView);
+            document.addEventListener('click', () => document.getElementById('testMenuDropdown').classList.remove('show'));
             renderAll();
         };
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            document.getElementById('viewSelector').value = viewName;
+            document.getElementById('profitReportCard').style.display = 'none'; // 切換時隱藏報告
+            renderAll();
+        }
+
+        function toggleTestMenu(e) { e.stopPropagation(); document.getElementById('testMenuDropdown').classList.toggle('show'); }
 
         function renderAll() {
             renderMenuFront();
             renderCartFront();
-            renderOrdersBack();
+            renderOrdersKitchen();
             updateStatsBack();
             renderMgmtProducts();
+            renderCostItems();
         }
 
+        // 1. 前台點餐
         function renderMenuFront() {
             const menuGrid = document.getElementById('menuGridFront');
-            if (products.length === 0) {
-                menuGrid.innerHTML = '<div class="empty-tips">選單無商品，請至後台新增</div>';
-                return;
-            }
             menuGrid.innerHTML = products.map(p => {
                 let promoText = (p.promoQty > 0 && p.promoMinus > 0) ? `<div class="menu-item-promo-tag">滿 ${p.promoQty} 個折 ${p.promoMinus}元</div>` : '';
+                let changedTag = p.isPriceChanged ? `<span style="font-size:0.65rem; color:var(--warning-orange); display:block; font-weight:bold;">⚠️改價特惠中</span>` : '';
+                if (p.isSoldOut) {
+                    return `<div class="menu-item sold-out"><div class="menu-item-name">${p.name} (售完)</div><div class="menu-item-price">NT$ ${p.price}</div></div>`;
+                }
                 return `
                     <div class="menu-item" onclick="addToCart(${p.id})">
                         <div class="menu-item-name">${p.name}</div>
                         <div class="menu-item-price">NT$ ${p.price}</div>
+                        ${changedTag}
                         ${promoText}
                     </div>
                 `;
             }).join('');
         }
 
-        function addToCart(productId) {
-            cart[productId] = (cart[productId] || 0) + 1;
-            renderCartFront();
-        }
-
-        function updateCartQty(productId, change) {
-            if (!cart[productId]) return;
-            cart[productId] += change;
-            if (cart[productId] <= 0) delete cart[productId];
-            renderCartFront();
-        }
+        function addToCart(id) { cart[id] = (cart[id] || 0) + 1; renderCartFront(); }
+        function updateCartQty(id, change) { if(cart[id]) { cart[id]+=change; if(cart[id]<=0) delete cart[id]; renderCartFront(); } }
 
         function renderCartFront() {
             const cartList = document.getElementById('cartListFront');
-            const subtotalEl = document.getElementById('subtotalPrice');
-            const autoDiscountEl = document.getElementById('autoDiscountPrice');
-            const manualDiscountEl = document.getElementById('manualDiscountPrice');
-            const totalPriceEl = document.getElementById('totalPriceFront');
-            const manualInput = document.getElementById('cartManualDiscount');
-            
-            const cartKeys = Object.keys(cart);
-            
-            if (cartKeys.length === 0) {
-                cartList.innerHTML = '<div class="empty-tips">點餐籃是空的，請點擊上方商品</div>';
-                subtotalEl.innerText = 'NT$ 0';
-                autoDiscountEl.innerText = '-NT$ 0';
-                manualDiscountEl.innerText = '-NT$ 0';
-                totalPriceEl.innerText = 'NT$ 0';
-                return;
-            }
+            const keys = Object.keys(cart);
+            if (keys.length === 0) { cartList.innerHTML = '<div class="empty-tips">點餐籃是空的</div>'; updateSummaryTexts(0,0,0); return; }
 
-            let subtotal = 0;
-            let totalAutoDiscount = 0;
-            let html = '';
-
-            cartKeys.forEach(id => {
+            let subtotal = 0, autoDiscount = 0, html = '';
+            keys.forEach(id => {
                 const prod = products.find(p => p.id == id);
                 if (prod) {
-                    const qty = cart[id];
-                    subtotal += prod.price * qty;
-
-                    // 計算該品項是否滿足固定優惠
-                    let itemAutoDiscount = 0;
-                    let promoAlertHtml = '';
+                    const qty = cart[id]; subtotal += prod.price * qty;
+                    let alertHtml = '';
                     if (prod.promoQty > 0 && prod.promoMinus > 0 && qty >= prod.promoQty) {
                         let sets = Math.floor(qty / prod.promoQty);
-                        itemAutoDiscount = sets * prod.promoMinus;
-                        totalAutoDiscount += itemAutoDiscount;
-                        promoAlertHtml = `<div class="promo-alert-text">🔥 已觸發優惠：買 ${prod.promoQty} 個折 ${prod.promoMinus} 元！(請務必告知客人)</div>`;
+                        autoDiscount += (sets * prod.promoMinus);
+                        alertHtml = `<div class="promo-alert-text">🔥 買 ${prod.promoQty} 折 ${prod.promoMinus}！(記得告知客人)</div>`;
                     }
-
                     html += `
-                        <div class="cart-item">
-                            <div class="cart-item-row">
-                                <div>
-                                    <div class="cart-item-name">${prod.name}</div>
-                                    <div class="cart-item-price">NT$ ${prod.price} × ${qty}</div>
-                                </div>
-                                <div class="quantity-control">
-                                    <button class="btn-qty" onclick="updateCartQty(${id}, -1)">-</button>
-                                    <span style="font-weight:bold; min-width:16px; text-align:center;">${qty}</span>
-                                    <button class="btn-qty" onclick="updateCartQty(${id}, 1)">+</button>
-                                </div>
+                        <div class="cart-item"><div class="cart-item-row">
+                            <div>
+                                <div style="font-weight:bold;">${prod.name} ${prod.isPriceChanged ? '<span style="color:var(--warning-orange); font-size:0.7rem;">(已改價)</span>':''}</div>
+                                <div style="font-size:0.8rem; color:var(--text-muted);">NT$ ${prod.price} × ${qty}</div>
                             </div>
-                            ${promoAlertHtml}
-                        </div>
-                    `;
+                            <div class="quantity-control">
+                                <button class="btn-qty" onclick="updateCartQty(${id}, -1)">-</button>
+                                <strong>${qty}</strong>
+                                <button class="btn-qty" onclick="updateCartQty(${id}, 1)">+</button>
+                            </div>
+                        </div>${alertHtml}</div>`;
                 }
             });
-
             cartList.innerHTML = html;
 
-            // 讀取手動折扣
-            let manualDiscount = parseInt(manualInput.value) || 0;
-            if (manualDiscount < 0) manualDiscount = 0;
+            let manualDiscount = parseInt(document.getElementById('cartManualDiscount').value) || 0;
+            updateSummaryTexts(subtotal, autoDiscount, manualDiscount);
+        }
 
-            let finalTotal = subtotal - totalAutoDiscount - manualDiscount;
-            if (finalTotal < 0) finalTotal = 0;
-
-            subtotalEl.innerText = `NT$ ${subtotal}`;
-            autoDiscountEl.innerText = `-NT$ ${totalAutoDiscount}`;
-            manualDiscountEl.innerText = `-NT$ ${manualDiscount}`;
-            totalPriceEl.innerText = `NT$ ${finalTotal}`;
+        function updateSummaryTexts(sub, auto, manual) {
+            let finalTotal = sub - auto - manual; if(finalTotal < 0) finalTotal = 0;
+            document.getElementById('subtotalPrice').innerText = `NT$ ${sub}`;
+            document.getElementById('autoDiscountPrice').innerText = `-NT$ ${auto}`;
+            document.getElementById('manualDiscountPrice').innerText = `-NT$ ${manual}`;
+            document.getElementById('totalPriceFront').innerText = `NT$ ${finalTotal}`;
         }
 
         function submitOrder() {
-            const cartKeys = Object.keys(cart);
-            if (cartKeys.length === 0) {
-                alert('點餐籃內沒有任何商品！');
-                return;
-            }
+            const keys = Object.keys(cart); if (keys.length === 0) return alert('籃子空空如也！');
+            let details = [], subtotal = 0, autoDiscount = 0, itemsArray = [];
+            let currentPriceChangedFlag = false;
 
-            let details = [], subtotal = 0, totalAutoDiscount = 0, itemsArray = [];
-
-            cartKeys.forEach(id => {
+            keys.forEach(id => {
                 const prod = products.find(p => p.id == id);
                 if (prod) {
-                    const qty = cart[id];
-                    subtotal += prod.price * qty;
-                    itemsArray.push({ id: prod.id, name: prod.name, qty: qty });
+                    const qty = cart[id]; subtotal += prod.price * qty;
+                    if(prod.isPriceChanged) currentPriceChangedFlag = true;
 
-                    let itemText = `${prod.name} x ${qty}`;
-                    // 計算優惠文字
+                    itemsArray.push({ id: prod.id, name: prod.name, price: prod.price, qty: qty, failedQty: 0 });
+                    let txt = `${prod.name} x ${qty}`;
                     if (prod.promoQty > 0 && prod.promoMinus > 0 && qty >= prod.promoQty) {
                         let sets = Math.floor(qty / prod.promoQty);
-                        let discountAmt = sets * prod.promoMinus;
-                        totalAutoDiscount += discountAmt;
-                        itemText += ` (已折 ${discountAmt}元 ★組合價)`;
+                        let disc = sets * prod.promoMinus; autoDiscount += disc;
+                        txt += ` (已折 ${disc}元 ★組合價)`;
                     }
-                    details.push(itemText);
+                    details.push(txt);
                 }
             });
 
-            const manualInput = document.getElementById('cartManualDiscount');
-            let manualDiscount = parseInt(manualInput.value) || 0;
-            if (manualDiscount < 0) manualDiscount = 0;
-            
-            let finalTotal = subtotal - totalAutoDiscount - manualDiscount;
-            if (finalTotal < 0) finalTotal = 0;
-
-            if (manualDiscount > 0) {
-                details.push(`[🎨 現場手動折抵: -NT$ ${manualDiscount}]`);
-            }
+            let manualDiscount = parseInt(document.getElementById('cartManualDiscount').value) || 0;
+            let finalTotal = subtotal - autoDiscount - manualDiscount; if(finalTotal < 0) finalTotal = 0;
+            if (manualDiscount > 0) details.push(`[🎨 現場手動折抵: -NT$ ${manualDiscount}]`);
+            if (currentPriceChangedFlag) details.push(`(⚠️ 此品項售價曾於後台變更過)`);
 
             const orderNumStr = '#' + String(nextOrderNumber).padStart(3, '0');
             const now = new Date();
-            const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
             orders.push({
-                id: Date.now(),
-                numberStr: orderNumStr,
-                time: timeStr,
-                detailsText: details.join('\n'),
-                items: itemsArray,
-                subtotal: subtotal,
-                autoDiscount: totalAutoDiscount,
-                manualDiscount: manualDiscount,
-                totalPrice: finalTotal,
-                status: 'pending'
+                id: Date.now(), numberStr: orderNumStr,
+                time: `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
+                detailsText: details.join('\n'), items: itemsArray,
+                subtotal: subtotal, autoDiscount: autoDiscount, manualDiscount: manualDiscount,
+                totalPrice: finalTotal, status: 'pending', partialRefund: 0,
+                hasModifiedPrice: currentPriceChangedFlag
             });
             nextOrderNumber++;
-
-            saveToLocalStorage();
-            cart = {};
-            manualInput.value = ''; 
-            renderCartFront();
-            renderOrdersBack();
-            updateStatsBack();
-
-            alert(`等餐號碼牌：${orderNumStr}\n實收金額：NT$ ${finalTotal}\n(如有觸發優惠，請口頭提醒客人喔！)`);
+            saveData(); cart = {}; document.getElementById('cartManualDiscount').value = '';
+            renderCartFront(); alert(`等餐號碼牌：${orderNumStr}\n實收金額：NT$ ${finalTotal}`);
         }
 
-        function renderOrdersBack() {
-            const orderQueue = document.getElementById('orderQueueBack');
+        // 2. 現場排單控制
+        function renderOrdersKitchen() {
+            const queue = document.getElementById('orderQueueKitchen');
             const pendingOrders = orders.filter(o => o.status === 'pending');
+            if (pendingOrders.length === 0) { queue.innerHTML = '<div class="empty-tips">目前沒有排隊中訂單，出餐人員可以稍作休息！</div>'; return; }
 
-            if (pendingOrders.length === 0) {
-                orderQueue.innerHTML = '<div class="empty-tips">目前沒有排隊中的訂單</div>';
-                return;
-            }
-
-            orderQueue.innerHTML = pendingOrders.map(o => `
-                <div class="order-card">
+            queue.innerHTML = pendingOrders.map(o => `
+                <div class="order-card ${o.items.some(i => i.failedQty > 0) ? 'partial' : ''}">
                     <div class="order-header">
                         <span class="order-number">${o.numberStr}</span>
-                        <span class="order-time">點餐時間 ${o.time}</span>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">點餐時間 ${o.time}</span>
                     </div>
-                    <div class="order-details">${o.detailsText}</div>
-                    <div style="font-size:0.95rem; font-weight:bold; color:var(--danger-red); margin-bottom:10px;">實收金額: NT$ ${o.totalPrice}</div>
+                    <div class="order-details" style="${o.hasModifiedPrice ? 'border-left: 3px solid var(--warning-orange);':''}">${o.detailsText}</div>
+                    <div style="font-size:0.9rem; font-weight:bold; color:var(--danger-red); margin-bottom:8px;">
+                        顧客實付: NT$ ${o.totalPrice} ${o.partialRefund > 0 ? `<span style="color:var(--warning-orange);">(已扣故障退款: -${o.partialRefund})</span>` : ''}
+                    </div>
                     <div class="order-actions">
-                        <button class="btn-action btn-delete" onclick="deleteOrder(${o.id})">刪除訂單</button>
-                        <button class="btn-action btn-complete" onclick="completeOrder(${o.id})">完成出餐</button>
+                        <button class="btn-action btn-partial" onclick="openPartialModal(${o.id})">⚠️ 部分出餐(商品出問題)</button>
+                        <button class="btn-action btn-complete" onclick="completeOrder(${o.id})">✅ 全數出餐完成</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function completeOrder(orderId) {
-            const order = orders.find(o => o.id === orderId);
-            if (order) {
-                order.status = 'completed';
-                saveToLocalStorage();
-                renderOrdersBack();
-                updateStatsBack();
-            }
+        function completeOrder(id) {
+            const o = orders.find(order => order.id === id);
+            if(o) { o.status = 'completed'; saveData(); renderOrdersKitchen(); updateStatsBack(); }
         }
 
-        function deleteOrder(orderId) {
-            if (confirm('確定要刪除這筆訂單嗎？後台帳目將會扣除此單金額。')) {
-                orders = orders.filter(o => o.id !== orderId);
-                saveToLocalStorage();
-                renderOrdersBack();
-                updateStatsBack();
-            }
+        function openPartialModal(orderId) {
+            currentActiveOrderId = orderId;
+            const o = orders.find(order => order.id === orderId);
+            const container = document.getElementById('modalItemsList');
+            
+            container.innerHTML = o.items.map(item => `
+                <div class="modal-item-row">
+                    <div><strong>${item.name}</strong> (點購 ${item.qty} 份)</div>
+                    <div style="font-size:0.85rem; color:var(--danger-red);">
+                        損壞/缺貨無法出餐: 
+                        <input type="number" id="fail-input-${item.id}" value="${item.failedQty}" min="0" max="${item.qty}" style="width:50px; text-align:center; padding:2px; border:1px solid var(--border-color); border-radius:4px;"> 份
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('partialModal').classList.add('show');
         }
 
+        function closePartialModal() { document.getElementById('partialModal').classList.remove('show'); }
+
+        function submitPartialOrder() {
+            const o = orders.find(order => order.id === currentActiveOrderId);
+            if(!o) return;
+
+            let extraRefund = 0, updatedDetails = [];
+
+            o.items.forEach(item => {
+                const inputEl = document.getElementById(`fail-input-${item.id}`);
+                const failQty = Math.min(item.qty, Math.max(0, parseInt(inputEl.value) || 0));
+                item.failedQty = failQty;
+
+                let txt = `${item.name} x ${item.qty}`;
+                if(failQty > 0) {
+                    txt += ` [⚠️ 其中 ${failQty} 份現場故障未出餐]`;
+                    extraRefund += (item.price * failQty);
+                }
+                updatedDetails.push(txt);
+            });
+
+            let oldTotal = o.subtotal - o.autoDiscount - o.manualDiscount;
+            if(oldTotal < 0) oldTotal = 0;
+            
+            o.partialRefund = extraRefund;
+            o.totalPrice = Math.max(0, oldTotal - extraRefund);
+            
+            if(o.autoDiscount > 0) updatedDetails.push(`(原組合優惠已折抵: -NT$ ${o.autoDiscount})`);
+            if(o.manualDiscount > 0) updatedDetails.push(`(原手動折抵: -NT$ ${o.manualDiscount})`);
+            if(extraRefund > 0) updatedDetails.push(`[🚨 系統已自動扣除故障金額: -NT$ ${extraRefund}]`);
+            if(o.hasModifiedPrice) updatedDetails.push(`(⚠️ 此品項售價曾於後台變更過)`);
+
+            o.detailsText = updatedDetails.join('\n');
+            o.status = 'completed';
+
+            saveData(); closePartialModal(); renderOrdersKitchen(); updateStatsBack();
+            alert('部分出餐故障申報成功！營業額已自動扣減。');
+        }
+
+        // 3. 後台管理
         function updateStatsBack() {
-            let totalRevenue = 0;
-            let accumAutoDiscount = 0;
-            let accumManualDiscount = 0;
-            let productSales = {};
+            let totalRevenue = 0, accumAuto = 0, accumManual = 0, productSales = {};
 
             orders.forEach(o => {
-                totalRevenue += o.totalPrice;
-                accumAutoDiscount += (o.autoDiscount || 0);
-                accumManualDiscount += (o.manualDiscount || 0);
-                o.items.forEach(item => {
-                    productSales[item.name] = (productSales[item.name] || 0) + item.qty;
-                });
+                if(o.status === 'completed') {
+                    totalRevenue += o.totalPrice;
+                    accumAuto += (o.autoDiscount || 0);
+                    accumManual += (o.manualDiscount || 0);
+                    o.items.forEach(item => {
+                        let actualSold = item.qty - (item.failedQty || 0);
+                        if(actualSold > 0) { productSales[item.name] = (productSales[item.name] || 0) + actualSold; }
+                    });
+                }
             });
 
             document.getElementById('statRevenue').innerText = `NT$ ${totalRevenue}`;
-            document.getElementById('statOrderCount').innerText = `${orders.length} 單`;
-            document.getElementById('statAutoDiscount').innerText = `NT$ ${accumAutoDiscount}`;
-            document.getElementById('statManualDiscount').innerText = `NT$ ${accumManualDiscount}`;
+            document.getElementById('statOrderCount').innerText = `${orders.filter(o=>o.status==='completed').length} 單`;
+            document.getElementById('statAutoDiscount').innerText = `NT$ ${accumAuto}`;
+            document.getElementById('statManualDiscount').innerText = `NT$ ${accumManual}`;
 
-            const sortedSales = Object.keys(productSales).map(name => ({ name, qty: productSales[name] })).sort((a, b) => b.qty - a.qty);
+            const sorted = Object.keys(productSales).map(n => ({ n, q: productSales[n] })).sort((a,b)=>b.q-a.q);
             const rankList = document.getElementById('rankList');
-            
-            if (sortedSales.length === 0) {
-                rankList.innerHTML = '<div class="empty-tips" style="padding: 5px 0;">暫無銷售數據</div>';
-                return;
-            }
-
-            rankList.innerHTML = sortedSales.map((item, index) => `
-                <li class="rank-item">
-                    <span>${index + 1}. ${item.name}</span>
-                    <span style="font-weight:bold; color:var(--accent-blue);">${item.qty} 份</span>
-                </li>
-            `).join('');
-        }
-
-        function addNewProduct() {
-            const nameInput = document.getElementById('newProdName');
-            const priceInput = document.getElementById('newProdPrice');
-            const promoQtyInput = document.getElementById('newProdPromoQty');
-            const promoMinusInput = document.getElementById('newProdPromoMinus');
-
-            const name = nameInput.value.trim();
-            const price = parseInt(priceInput.value);
-            const promoQty = parseInt(promoQtyInput.value) || 0;
-            const promoMinus = parseInt(promoMinusInput.value) || 0;
-
-            if (!name || isNaN(price) || price < 0) return alert('請輸入正確的商品名稱與價格！');
-
-            if (confirm(`確定要新增商品「${name}」嗎？`)) {
-                products.push({
-                    id: Date.now(),
-                    name,
-                    price,
-                    promoQty,
-                    promoMinus
-                });
-                localStorage.setItem('bazaar_products2', JSON.stringify(products));
-                
-                nameInput.value = ''; 
-                priceInput.value = '';
-                promoQtyInput.value = '';
-                promoMinusInput.value = '';
-
-                renderMenuFront(); 
-                renderMgmtProducts();
-            }
-        }
-
-        function removeProduct(productId) {
-            const prod = products.find(p => p.id === productId);
-            if (prod && confirm(`確定要移除「${prod.name}」嗎？`)) {
-                products = products.filter(p => p.id !== productId);
-                localStorage.setItem('bazaar_products2', JSON.stringify(products));
-                cart = {};
-                renderMenuFront(); 
-                renderCartFront(); 
-                renderMgmtProducts();
-            }
+            rankList.innerHTML = sorted.length === 0 ? '<div class="empty-tips">尚無出餐完成數據</div>' : sorted.map((item,i) => `
+                <li style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed var(--border-color);">
+                    <span>${i+1}. ${item.n}</span><strong>${item.q} 份</strong>
+                </li>`).join('');
         }
 
         function renderMgmtProducts() {
-            const listEl = document.getElementById('mgmtProductList');
-            if (products.length === 0) {
-                listEl.innerHTML = '<div class="empty-tips" style="padding:10px 0;">目前無商品品項</div>';
-                return;
-            }
-            listEl.innerHTML = products.map(p => {
-                let promoInfo = (p.promoQty > 0 && p.promoMinus > 0) ? `✨ 優惠：每買 ${p.promoQty} 個折 ${p.promoMinus} 元` : '無固定優惠';
+            const list = document.getElementById('mgmtProductList');
+            list.innerHTML = products.map(p => {
+                let statusBtn = p.isSoldOut 
+                    ? `<button class="btn-status-toggle soldout" onclick="toggleSoldOut(${p.id})">🛑 售完</button>`
+                    : `<button class="btn-status-toggle normal" onclick="toggleSoldOut(${p.id})">🍏 販售中</button>`;
+                let promo = (p.promoQty>0 && p.promoMinus>0) ? `每買 ${p.promoQty} 折 ${p.promoMinus}元` : '無優惠';
+                let priceLabel = p.isPriceChanged ? `<span style="color:var(--warning-orange); font-size:0.7rem; font-weight:bold;">(⚠️已變更價格)</span>` : '';
                 return `
                     <div class="mgmt-list-item">
-                        <div class="mgmt-list-info">
-                            <span><strong>${p.name}</strong> (NT$ ${p.price})</span>
-                            <button class="btn-remove-prod" onclick="removeProduct(${p.id})">刪除品項</button>
+                        <div style="flex:1;">
+                            <div><strong>${p.name}</strong> <span style="color:var(--accent-blue); font-weight:bold;">NT$ ${p.price}</span> ${priceLabel}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">${promo}</div>
                         </div>
-                        <div class="mgmt-list-promo">${promoInfo}</div>
-                    </div>
-                `;
+                        <div style="display:flex; align-items:center; gap:2px;">
+                            ${statusBtn}
+                            <button class="btn-mgmt-action" style="color:var(--accent-blue); border-color:var(--accent-blue);" onclick="modifyProductPrice(${p.id})">💰 改價</button>
+                            <button class="btn-mgmt-action" style="color:var(--danger-red); border-color:var(--danger-red);" onclick="removeProduct(${p.id})">刪除</button>
+                        </div>
+                    </div>`;
             }).join('');
         }
 
-        function saveToLocalStorage() {
-            localStorage.setItem('bazaar_orders2', JSON.stringify(orders));
-            localStorage.setItem('bazaar_next_number2', nextOrderNumber.toString());
+        function modifyProductPrice(id) {
+            const p = products.find(prod => prod.id === id);
+            if(!p) return;
+            const newPriceStr = prompt(`請輸入 [${p.name}] 的全新銷售價格 (目前為 NT$ ${p.price}):`, p.price);
+            if(newPriceStr === null) return; 
+            const newPrice = parseInt(newPriceStr);
+            if(isNaN(newPrice) || newPrice < 0) return alert('請輸入正確的金額數字！');
+            
+            p.price = newPrice;
+            p.isPriceChanged = true; // 標記被修改過價格
+            localStorage.setItem('bazaar_products4', JSON.stringify(products));
+            renderAll();
+            alert(`價格更新成功！前台點餐金額已連動為 NT$ ${newPrice}`);
         }
 
-        function toggleView() {
-            const frontView = document.getElementById('frontView');
-            const backView = document.getElementById('backView');
-            const btnToggle = document.getElementById('btnToggle');
-            const headerTitle = document.getElementById('headerTitle');
+        function toggleSoldOut(id) {
+            const p = products.find(prod => prod.id === id);
+            if(p) { p.isSoldOut = !p.isSoldOut; localStorage.setItem('bazaar_products4', JSON.stringify(products)); renderAll(); }
+        }
 
-            if (currentView === 'front') {
-                currentView = 'back';
-                frontView.classList.remove('active'); 
-                backView.classList.add('active');
-                btnToggle.innerText = '📱 回到前台點餐';
-                headerTitle.innerText = '🎪 園遊會收銀系統 (後台數據)';
-                renderAll(); 
-            } else {
-                currentView = 'front';
-                backView.classList.remove('active'); 
-                frontView.classList.add('active');
-                btnToggle.innerText = '⚙️ 進入後台數據';
-                headerTitle.innerText = '🎪 園遊會收銀系統 (前台點餐)';
+        function addNewProduct() {
+            const name = document.getElementById('newProdName').value.trim();
+            const price = parseInt(document.getElementById('newProdPrice').value);
+            const q = parseInt(document.getElementById('newProdPromoQty').value) || 0;
+            const m = parseInt(document.getElementById('newProdPromoMinus').value) || 0;
+
+            if(!name || isNaN(price) || price<0) return alert('請填寫正確格式');
+            products.push({ id: Date.now(), name, price, promoQty: q, promoMinus: m, isSoldOut: false, isPriceChanged: false });
+            localStorage.setItem('bazaar_products4', JSON.stringify(products));
+            document.getElementById('newProdName').value = ''; document.getElementById('newProdPrice').value = '';
+            document.getElementById('newProdPromoQty').value = ''; document.getElementById('newProdPromoMinus').value = '';
+            renderAll();
+        }
+
+        function removeProduct(id) {
+            if(confirm('確定要移除此品項設定嗎？')) { products = products.filter(p=>p.id!==id); localStorage.setItem('bazaar_products4', JSON.stringify(products)); renderAll(); }
+        }
+
+        // 4. 成本與利潤管理控制
+        function addCostItem() {
+            const name = document.getElementById('costItemName').value.trim();
+            const amount = parseInt(document.getElementById('costItemAmount').value);
+            if(!name || isNaN(amount) || amount <= 0) return alert('請完整填寫花費品項與正確的金額！');
+
+            costItems.push({ id: Date.now(), name: name, amount: amount });
+            localStorage.setItem('bazaar_costs4', JSON.stringify(costItems));
+            document.getElementById('costItemName').value = '';
+            document.getElementById('costItemAmount').value = '';
+            renderCostItems();
+            document.getElementById('profitReportCard').style.display = 'none'; // 新增成本後隱藏舊的利潤報告
+        }
+
+        function removeCostItem(id) {
+            if(confirm('確定要刪除此筆成本花費紀錄嗎？')) {
+                costItems = costItems.filter(item => item.id !== id);
+                localStorage.setItem('bazaar_costs4', JSON.stringify(costItems));
+                renderCostItems();
+                document.getElementById('profitReportCard').style.display = 'none';
             }
         }
 
+        function renderCostItems() {
+            const tbody = document.getElementById('costTableBody');
+            if(costItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="empty-tips" style="text-align:center;">目前尚無登錄成本項目</td></tr>';
+                document.getElementById('costTotalText').innerText = '成本花費總計：NT$ 0';
+                return;
+            }
+
+            let totalCost = 0;
+            tbody.innerHTML = costItems.map(item => {
+                totalCost += item.amount;
+                return `
+                    <tr>
+                        <td><strong>${item.name}</strong></td>
+                        <td style="color: var(--purple-cost); font-weight: bold;">NT$ ${item.amount}</td>
+                        <td><button style="color: var(--danger-red); background: none; border: none; cursor:pointer; text-decoration: underline; font-size: 0.8rem;" onclick="removeCostItem(${item.id})">刪除</button></td>
+                    </tr>
+                `;
+            }).join('');
+            document.getElementById('costTotalText').innerText = `成本花費總計：NT$ ${totalCost}`;
+        }
+
+        function calculateProfit() {
+            // 計算實收總營業額 (僅計算已出餐完畢的訂單)
+            let totalRevenue = 0;
+            orders.forEach(o => { if(o.status === 'completed') totalRevenue += o.totalPrice; });
+
+            // 計算總成本
+            let totalCost = 0;
+            costItems.forEach(item => totalCost += item.amount);
+
+            // 計算淨利潤
+            let netProfit = totalRevenue - totalCost;
+
+            // 計算投資報酬率 ROI = (淨利潤 / 總成本) * 100
+            let roiText = "0%";
+            if(totalCost > 0) {
+                let roiValue = (netProfit / totalCost) * 100;
+                roiText = roiValue.toFixed(1) + "%";
+            } else if(netProfit > 0) {
+                roiText = "無限大 (尚未投入任何成本)";
+            }
+
+            // 渲染至介面
+            document.getElementById('reportRevenue').innerText = `NT$ ${totalRevenue}`;
+            document.getElementById('reportCost').innerText = `NT$ ${totalCost}`;
+            
+            const profitEl = document.getElementById('reportNetProfit');
+            profitEl.innerText = `NT$ ${netProfit}`;
+            if(netProfit >= 0) {
+                profitEl.style.color = 'var(--success-green)';
+            } else {
+                profitEl.style.color = 'var(--danger-red)';
+            }
+
+            document.getElementById('reportROI').innerText = roiText;
+            document.getElementById('profitReportCard').style.display = 'block';
+        }
+
+        function saveData() {
+            localStorage.setItem('bazaar_orders4', JSON.stringify(orders));
+            localStorage.setItem('bazaar_next_number4', nextOrderNumber.toString());
+        }
+
         function resetAllData() {
-            if (confirm('⚠️ 警告：這將會清除全天所有的訂單、折扣記錄與營業額統計，且無法復原！確定清空嗎？')) {
-                localStorage.removeItem('bazaar_orders2'); 
-                localStorage.removeItem('bazaar_next_number2');
-                orders = []; 
-                nextOrderNumber = 1; 
-                cart = {};
-                renderCartFront(); 
-                renderOrdersBack(); 
-                updateStatsBack();
-                alert('數據已全數清空！');
+            if(confirm('🚨 注意：確定要清空今天的全部銷售、排單、成本與折扣統計嗎？（無法復原）')) {
+                localStorage.removeItem('bazaar_orders4'); localStorage.removeItem('bazaar_next_number4'); localStorage.removeItem('bazaar_costs4');
+                orders = []; costItems = []; nextOrderNumber = 1; cart = {}; renderAll(); alert('數據已徹底重置！');
             }
         }
     </script>
