@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>園遊會高效收銀、出餐與成本利潤系統</title>
+    <title>園遊會高效收銀、出餐與成本利潤系統 (雲端同步版)</title>
     <style>
         :root {
             --bg-main: #f8fafc;
@@ -50,7 +50,6 @@
         .header-info h1 { font-size: 1.1rem; color: #0369a1; }
         .header-info p { font-size: 0.75rem; color: #0c4a6e; }
 
-        /* 下拉選單樣式 */
         .view-selector {
             padding: 8px 12px;
             font-size: 0.95rem;
@@ -95,7 +94,6 @@
             color: #0369a1;
         }
 
-        /* 菜單 & 售完狀態 */
         .menu-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -129,8 +127,7 @@
         .menu-item.sold-out .menu-item-price { color: #94a3b8; }
         .menu-item-promo-tag { font-size: 0.7rem; color: var(--success-green); margin-top: 4px; font-weight: bold; }
 
-        /* 購物車 */
-        .cart-list { max-height: 240px; overflow-y: auto; margin-bottom: 12px; }
+        .cart-list { max-height: 200px; overflow-y: auto; margin-bottom: 12px; }
         .cart-item { padding: 8px 0; border-bottom: 1px solid #f1f5f9; }
         .cart-item-row { display: flex; justify-content: space-between; align-items: center; }
         .promo-alert-text {
@@ -142,17 +139,19 @@
         .btn-qty { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-color); background: #ffffff; cursor: pointer; }
 
         .discount-section {
-            margin-top: 12px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px dashed var(--border-color);
-            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 8px; padding: 10px; background: #f8fafc; border-radius: 8px; border: 1px dashed var(--border-color);
+            display: flex; flex-direction: column; gap: 8px;
         }
+        .discount-row { display: flex; align-items: center; justify-content: space-between; }
         .discount-input { width: 80px; padding: 5px; border: 1px solid var(--border-color); border-radius: 6px; text-align: center; }
+        .note-input { width: 100%; padding: 6px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.85rem; margin-top: 2px; }
 
         .cart-summary { margin-top: 12px; padding-top: 12px; border-top: 2px dashed var(--border-color); }
         .summary-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 4px; }
         .total-row { display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: bold; color: var(--danger-red); margin-top: 6px; margin-bottom: 12px; }
         .btn-submit { width: 100%; background: var(--accent-blue); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; }
 
-        /* 現場排單 */
         .order-card { border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; background: #ffffff; border-left: 5px solid var(--accent-blue); margin-bottom: 12px; }
         .order-card.partial { border-left-color: var(--warning-orange); }
         .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -163,14 +162,12 @@
         .btn-complete { background: var(--success-green); color: white; }
         .btn-partial { background: var(--warning-orange); color: white; }
 
-        /* 彈出視窗 */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 15px; }
         .modal.show { display: flex; }
         .modal-content { background: white; padding: 20px; border-radius: 12px; max-width: 400px; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .modal-title { font-weight: bold; margin-bottom: 12px; color: #0369a1; font-size: 1.1rem; }
         .modal-item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #e2e8f0; }
 
-        /* 後台控制 */
         .test-menu-container { position: relative; display: inline-block; }
         .btn-test-menu-toggle { background: #f1f5f9; color: var(--text-muted); border: 1px solid var(--border-color); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
         .test-menu-dropdown { display: none; position: absolute; right: 0; top: 110%; background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 100; min-width: 130px; }
@@ -194,7 +191,6 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
 
-        /* 成本與利潤專屬樣式 */
         .cost-list-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
         .cost-list-table th, .cost-list-table td { padding: 8px; text-align: left; border-bottom: 1px solid #e2e8f0; }
         .cost-list-table th { background-color: #f1f5f9; color: var(--text-dark); }
@@ -205,8 +201,8 @@
 
     <header>
         <div class="header-info">
-            <h1 id="headerTitle">🎪 園遊會管理調度中心</h1>
-            <p>數據即時保存於本地，支援部分出餐、靈活改價與利潤分析</p>
+            <h1 id="headerTitle">🎪 園遊會管理調度中心 (雲端同步版)</h1>
+            <p>即時雲端資料庫連線，全場平板同步、支援彈性變更與備註</p>
         </div>
         <!-- 畫面切換下拉式選單 -->
         <select class="view-selector" id="viewSelector" onchange="switchView(this.value)">
@@ -229,10 +225,16 @@
                 <div class="cart-list" id="cartListFront"></div>
                 
                 <div class="discount-section">
-                    <span style="font-size:0.85rem; font-weight:bold; color:var(--text-muted);">🎁 臨時手動折價</span>
+                    <div class="discount-row">
+                        <span style="font-size:0.85rem; font-weight:bold; color:var(--text-muted);">🎁 臨時手動折價</span>
+                        <div>
+                            <span style="color:var(--text-muted); font-size:0.85rem;">減 NT$</span>
+                            <input type="number" id="cartManualDiscount" class="discount-input" placeholder="0" min="0" oninput="renderCartFront()">
+                        </div>
+                    </div>
                     <div>
-                        <span style="color:var(--text-muted); font-size:0.85rem;">減 NT$</span>
-                        <input type="number" id="cartManualDiscount" class="discount-input" placeholder="0" min="0" oninput="renderCartFront()">
+                        <span style="font-size:0.85rem; font-weight:bold; color:var(--text-muted);">📝 訂單特別備註 (如：去冰加辣/折扣招待原因)</span>
+                        <input type="text" id="cartOrderNote" class="note-input" placeholder="請輸入此單特殊備註需求...">
                     </div>
                 </div>
 
@@ -241,7 +243,7 @@
                     <div class="summary-row" style="color: var(--success-green);"><span>固定組合優惠扣除</span><span id="autoDiscountPrice">-NT$ 0</span></div>
                     <div class="summary-row" style="color: #b45309;"><span>臨時手動折價扣除</span><span id="manualDiscountPrice">-NT$ 0</span></div>
                     <div class="total-row"><span>實收總計</span><span id="totalPriceFront">NT$ 0</span></div>
-                    <button class="btn-submit" onclick="submitOrder()">送出訂單 ➡️ 生成號碼牌</button>
+                    <button class="btn-submit" id="submitOrderBtn" onclick="submitOrder()">送出訂單 ➡️ 生成號碼牌</button>
                 </div>
             </div>
         </div>
@@ -367,34 +369,66 @@
         </div>
     </div>
 
-    <script>
+    <!-- Firebase 核心雲端引擎 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, updateDoc, doc, deleteDoc, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ⚠️ 明天起床把你在 Firebase 複製的專案金鑰貼在下面替換掉！
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // 本地變數快取
         const defaultProducts = [
             { id: 1, name: "糖葫蘆", price: 35, promoQty: 3, promoMinus: 5, isSoldOut: false, isPriceChanged: false },
             { id: 2, name: "炒麵", price: 60, promoQty: 0, promoMinus: 0, isSoldOut: false, isPriceChanged: false },
             { id: 3, name: "紅茶", price: 25, promoQty: 0, promoMinus: 0, isSoldOut: false, isPriceChanged: false }
         ];
 
-        let products = JSON.parse(localStorage.getItem('bazaar_products4')) || defaultProducts;
-        let orders = JSON.parse(localStorage.getItem('bazaar_orders4')) || [];
-        let costItems = JSON.parse(localStorage.getItem('bazaar_costs4')) || [];
-        let nextOrderNumber = parseInt(localStorage.getItem('bazaar_next_number4')) || 1;
+        let products = JSON.parse(localStorage.getItem('bazaar_products5')) || defaultProducts;
+        let orders = [];
+        let costItems = [];
         let cart = {}; 
         let currentActiveOrderId = null;
+
+        // 監聽雲端資料庫 (訂單) - 即時多設備推播同步
+        onSnapshot(query(collection(db, "orders"), orderBy("timestamp", "asc")), (snapshot) => {
+            orders = [];
+            snapshot.forEach((d) => { orders.push({ id: d.id, ...d.data() }); });
+            renderOrdersKitchen();
+            updateStatsBack();
+        });
+
+        // 監聽雲端資料庫 (成本) - 即時多設備推播同步
+        onSnapshot(query(collection(db, "costs"), orderBy("timestamp", "asc")), (snapshot) => {
+            costItems = [];
+            snapshot.forEach((d) => { costItems.push({ id: d.id, ...d.data() }); });
+            renderCostItems();
+        });
 
         window.onload = function() {
             document.addEventListener('click', () => document.getElementById('testMenuDropdown').classList.remove('show'));
             renderAll();
         };
 
-        function switchView(viewName) {
+        window.switchView = function(viewName) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${viewName}`).classList.add('active');
             document.getElementById('viewSelector').value = viewName;
-            document.getElementById('profitReportCard').style.display = 'none'; // 切換時隱藏報告
+            document.getElementById('profitReportCard').style.display = 'none';
             renderAll();
         }
 
-        function toggleTestMenu(e) { e.stopPropagation(); document.getElementById('testMenuDropdown').classList.toggle('show'); }
+        window.toggleTestMenu = function(e) { e.stopPropagation(); document.getElementById('testMenuDropdown').classList.toggle('show'); }
 
         function renderAll() {
             renderMenuFront();
@@ -425,10 +459,10 @@
             }).join('');
         }
 
-        function addToCart(id) { cart[id] = (cart[id] || 0) + 1; renderCartFront(); }
-        function updateCartQty(id, change) { if(cart[id]) { cart[id]+=change; if(cart[id]<=0) delete cart[id]; renderCartFront(); } }
+        window.addToCart = function(id) { cart[id] = (cart[id] || 0) + 1; renderCartFront(); }
+        window.updateCartQty = function(id, change) { if(cart[id]) { cart[id]+=change; if(cart[id]<=0) delete cart[id]; renderCartFront(); } }
 
-        function renderCartFront() {
+        window.renderCartFront = function() {
             const cartList = document.getElementById('cartListFront');
             const keys = Object.keys(cart);
             if (keys.length === 0) { cartList.innerHTML = '<div class="empty-tips">點餐籃是空的</div>'; updateSummaryTexts(0,0,0); return; }
@@ -442,7 +476,7 @@
                     if (prod.promoQty > 0 && prod.promoMinus > 0 && qty >= prod.promoQty) {
                         let sets = Math.floor(qty / prod.promoQty);
                         autoDiscount += (sets * prod.promoMinus);
-                        alertHtml = `<div class="promo-alert-text">🔥 買 ${prod.promoQty} 折 ${prod.promoMinus}！(記得告知客人)</div>`;
+                        alertHtml = `<div class="promo-alert-text">🔥 買 ${prod.promoQty} 折 ${prod.promoMinus}！</div>`;
                     }
                     html += `
                         <div class="cart-item"><div class="cart-item-row">
@@ -472,8 +506,14 @@
             document.getElementById('totalPriceFront').innerText = `NT$ ${finalTotal}`;
         }
 
-        function submitOrder() {
+        window.submitOrder = async function() {
             const keys = Object.keys(cart); if (keys.length === 0) return alert('籃子空空如也！');
+            
+            // 防連點鎖定按鈕
+            const submitBtn = document.getElementById("submitOrderBtn");
+            submitBtn.disabled = true;
+            submitBtn.innerText = "雲端同步中...⏳";
+
             let details = [], subtotal = 0, autoDiscount = 0, itemsArray = [];
             let currentPriceChangedFlag = false;
 
@@ -490,29 +530,56 @@
                         let disc = sets * prod.promoMinus; autoDiscount += disc;
                         txt += ` (已折 ${disc}元 ★組合價)`;
                     }
+                    if (prod.isPriceChanged) txt += ` (⚠️此品項售價變更過)`;
                     details.push(txt);
                 }
             });
 
             let manualDiscount = parseInt(document.getElementById('cartManualDiscount').value) || 0;
             let finalTotal = subtotal - autoDiscount - manualDiscount; if(finalTotal < 0) finalTotal = 0;
-            if (manualDiscount > 0) details.push(`[🎨 現場手動折抵: -NT$ ${manualDiscount}]`);
-            if (currentPriceChangedFlag) details.push(`(⚠️ 此品項售價曾於後台變更過)`);
+            
+            if (manualDiscount > 0) details.push(`[🎨 手動折抵: -NT$ ${manualDiscount}]`);
+            
+            // 抓取手動自訂備註
+            let userNote = document.getElementById('cartOrderNote').value.trim();
+            if(userNote !== "") {
+                details.push(`[📝 客服備註: ${userNote}]`);
+            }
 
-            const orderNumStr = '#' + String(nextOrderNumber).padStart(3, '0');
+            // 計算當前流水號
+            const orderNumStr = '#' + String(orders.length + 1).padStart(3, '0');
             const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
-            orders.push({
-                id: Date.now(), numberStr: orderNumStr,
-                time: `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,
-                detailsText: details.join('\n'), items: itemsArray,
-                subtotal: subtotal, autoDiscount: autoDiscount, manualDiscount: manualDiscount,
-                totalPrice: finalTotal, status: 'pending', partialRefund: 0,
-                hasModifiedPrice: currentPriceChangedFlag
-            });
-            nextOrderNumber++;
-            saveData(); cart = {}; document.getElementById('cartManualDiscount').value = '';
-            renderCartFront(); alert(`等餐號碼牌：${orderNumStr}\n實收金額：NT$ ${finalTotal}`);
+            try {
+                // 上傳到 Firebase 雲端資料庫
+                await addDoc(collection(db, "orders"), {
+                    numberStr: orderNumStr,
+                    time: timeStr,
+                    detailsText: details.join('\n'),
+                    items: itemsArray,
+                    subtotal: subtotal,
+                    autoDiscount: autoDiscount,
+                    manualDiscount: manualDiscount,
+                    totalPrice: finalTotal,
+                    status: 'pending',
+                    partialRefund: 0,
+                    hasModifiedPrice: currentPriceChangedFlag,
+                    userCustomNote: userNote,
+                    timestamp: new Date().getTime()
+                });
+
+                cart = {}; 
+                document.getElementById('cartManualDiscount').value = '';
+                document.getElementById('cartOrderNote').value = '';
+                renderCartFront();
+                alert(`🎉 點餐成功！等餐號牌：${orderNumStr}\n實收金額：NT$ ${finalTotal}`);
+            } catch (err) {
+                alert("雲端儲存失敗，請檢查網路連線！", err);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "送出訂單 ➡️ 生成號碼牌";
+            }
         }
 
         // 2. 現場排單控制
@@ -527,26 +594,27 @@
                         <span class="order-number">${o.numberStr}</span>
                         <span style="font-size:0.8rem; color:var(--text-muted);">點餐時間 ${o.time}</span>
                     </div>
-                    <div class="order-details" style="${o.hasModifiedPrice ? 'border-left: 3px solid var(--warning-orange);':''}">${o.detailsText}</div>
+                    <div class="order-details" style="${o.hasModifiedPrice || o.manualDiscount > 0 ? 'border-left: 3px solid var(--warning-orange);':''}">${o.detailsText}</div>
                     <div style="font-size:0.9rem; font-weight:bold; color:var(--danger-red); margin-bottom:8px;">
                         顧客實付: NT$ ${o.totalPrice} ${o.partialRefund > 0 ? `<span style="color:var(--warning-orange);">(已扣故障退款: -${o.partialRefund})</span>` : ''}
                     </div>
                     <div class="order-actions">
-                        <button class="btn-action btn-partial" onclick="openPartialModal(${o.id})">⚠️ 部分出餐(商品出問題)</button>
-                        <button class="btn-action btn-complete" onclick="completeOrder(${o.id})">✅ 全數出餐完成</button>
+                        <button class="btn-action btn-partial" onclick="openPartialModal('${o.id}')">⚠️ 部分出餐(商品出問題)</button>
+                        <button class="btn-action btn-complete" onclick="completeOrder('${o.id}')">✅ 全數出餐完成</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function completeOrder(id) {
-            const o = orders.find(order => order.id === id);
-            if(o) { o.status = 'completed'; saveData(); renderOrdersKitchen(); updateStatsBack(); }
+        window.completeOrder = async function(cloudId) {
+            try {
+                await updateDoc(doc(db, "orders", cloudId), { status: 'completed' });
+            } catch(e) { alert("出餐更新失敗！", e); }
         }
 
-        function openPartialModal(orderId) {
-            currentActiveOrderId = orderId;
-            const o = orders.find(order => order.id === orderId);
+        window.openPartialModal = function(cloudId) {
+            currentActiveOrderId = cloudId;
+            const o = orders.find(order => order.id === cloudId);
             const container = document.getElementById('modalItemsList');
             
             container.innerHTML = o.items.map(item => `
@@ -561,9 +629,9 @@
             document.getElementById('partialModal').classList.add('show');
         }
 
-        function closePartialModal() { document.getElementById('partialModal').classList.remove('show'); }
+        window.closePartialModal = function() { document.getElementById('partialModal').classList.remove('show'); }
 
-        function submitPartialOrder() {
+        window.submitPartialOrder = async function() {
             const o = orders.find(order => order.id === currentActiveOrderId);
             if(!o) return;
 
@@ -579,25 +647,31 @@
                     txt += ` [⚠️ 其中 ${failQty} 份現場故障未出餐]`;
                     extraRefund += (item.price * failQty);
                 }
+                if (o.hasModifiedPrice) txt += ` (⚠️此品項售價變更過)`;
                 updatedDetails.push(txt);
             });
 
             let oldTotal = o.subtotal - o.autoDiscount - o.manualDiscount;
             if(oldTotal < 0) oldTotal = 0;
             
-            o.partialRefund = extraRefund;
-            o.totalPrice = Math.max(0, oldTotal - extraRefund);
+            let finalPrice = Math.max(0, oldTotal - extraRefund);
             
             if(o.autoDiscount > 0) updatedDetails.push(`(原組合優惠已折抵: -NT$ ${o.autoDiscount})`);
             if(o.manualDiscount > 0) updatedDetails.push(`(原手動折抵: -NT$ ${o.manualDiscount})`);
             if(extraRefund > 0) updatedDetails.push(`[🚨 系統已自動扣除故障金額: -NT$ ${extraRefund}]`);
-            if(o.hasModifiedPrice) updatedDetails.push(`(⚠️ 此品項售價曾於後台變更過)`);
+            if(o.userCustomNote && o.userCustomNote !== "") updatedDetails.push(`[📝 客服備註: ${o.userCustomNote}]`);
 
-            o.detailsText = updatedDetails.join('\n');
-            o.status = 'completed';
-
-            saveData(); closePartialModal(); renderOrdersKitchen(); updateStatsBack();
-            alert('部分出餐故障申報成功！營業額已自動扣減。');
+            try {
+                await updateDoc(doc(db, "orders", currentActiveOrderId), {
+                    items: o.items,
+                    detailsText: updatedDetails.join('\n'),
+                    partialRefund: extraRefund,
+                    totalPrice: finalPrice,
+                    status: 'completed'
+                });
+                closePartialModal();
+                alert('部分出餐故障申報成功！雲端營業額已自動同步扣減。');
+            } catch(e) { alert("雲端修改失敗", e); }
         }
 
         // 3. 後台管理
@@ -636,7 +710,7 @@
                     ? `<button class="btn-status-toggle soldout" onclick="toggleSoldOut(${p.id})">🛑 售完</button>`
                     : `<button class="btn-status-toggle normal" onclick="toggleSoldOut(${p.id})">🍏 販售中</button>`;
                 let promo = (p.promoQty>0 && p.promoMinus>0) ? `每買 ${p.promoQty} 折 ${p.promoMinus}元` : '無優惠';
-                let priceLabel = p.isPriceChanged ? `<span style="color:var(--warning-orange); font-size:0.7rem; font-weight:bold;">(⚠️已變更價格)</span>` : '';
+                let priceLabel = p.isPriceChanged ? `<span style="color:var(--warning-orange); font-size:0.7rem; font-weight:bold;">(⚠️價格曾變更過)</span>` : '';
                 return `
                     <div class="mgmt-list-item">
                         <div style="flex:1;">
@@ -652,7 +726,7 @@
             }).join('');
         }
 
-        function modifyProductPrice(id) {
+        window.modifyProductPrice = function(id) {
             const p = products.find(prod => prod.id === id);
             if(!p) return;
             const newPriceStr = prompt(`請輸入 [${p.name}] 的全新銷售價格 (目前為 NT$ ${p.price}):`, p.price);
@@ -661,18 +735,18 @@
             if(isNaN(newPrice) || newPrice < 0) return alert('請輸入正確的金額數字！');
             
             p.price = newPrice;
-            p.isPriceChanged = true; // 標記被修改過價格
-            localStorage.setItem('bazaar_products4', JSON.stringify(products));
+            p.isPriceChanged = true; 
+            localStorage.setItem('bazaar_products5', JSON.stringify(products));
             renderAll();
-            alert(`價格更新成功！前台點餐金額已連動為 NT$ ${newPrice}`);
+            alert(`價格更新成功！前台點餐金額已連動為 NT$ ${newPrice}，新訂單將自動標註改價標籤。`);
         }
 
-        function toggleSoldOut(id) {
+        window.toggleSoldOut = function(id) {
             const p = products.find(prod => prod.id === id);
-            if(p) { p.isSoldOut = !p.isSoldOut; localStorage.setItem('bazaar_products4', JSON.stringify(products)); renderAll(); }
+            if(p) { p.isSoldOut = !p.isSoldOut; localStorage.setItem('bazaar_products5', JSON.stringify(products)); renderAll(); }
         }
 
-        function addNewProduct() {
+        window.addNewProduct = function() {
             const name = document.getElementById('newProdName').value.trim();
             const price = parseInt(document.getElementById('newProdPrice').value);
             const q = parseInt(document.getElementById('newProdPromoQty').value) || 0;
@@ -680,36 +754,40 @@
 
             if(!name || isNaN(price) || price<0) return alert('請填寫正確格式');
             products.push({ id: Date.now(), name, price, promoQty: q, promoMinus: m, isSoldOut: false, isPriceChanged: false });
-            localStorage.setItem('bazaar_products4', JSON.stringify(products));
+            localStorage.setItem('bazaar_products5', JSON.stringify(products));
             document.getElementById('newProdName').value = ''; document.getElementById('newProdPrice').value = '';
             document.getElementById('newProdPromoQty').value = ''; document.getElementById('newProdPromoMinus').value = '';
             renderAll();
         }
 
-        function removeProduct(id) {
-            if(confirm('確定要移除此品項設定嗎？')) { products = products.filter(p=>p.id!==id); localStorage.setItem('bazaar_products4', JSON.stringify(products)); renderAll(); }
+        window.removeProduct = function(id) {
+            if(confirm('確定要移除此品項設定嗎？')) { products = products.filter(p=>p.id!==id); localStorage.setItem('bazaar_products5', JSON.stringify(products)); renderAll(); }
         }
 
         // 4. 成本與利潤管理控制
-        function addCostItem() {
+        window.addCostItem = async function() {
             const name = document.getElementById('costItemName').value.trim();
             const amount = parseInt(document.getElementById('costItemAmount').value);
             if(!name || isNaN(amount) || amount <= 0) return alert('請完整填寫花費品項與正確的金額！');
 
-            costItems.push({ id: Date.now(), name: name, amount: amount });
-            localStorage.setItem('bazaar_costs4', JSON.stringify(costItems));
-            document.getElementById('costItemName').value = '';
-            document.getElementById('costItemAmount').value = '';
-            renderCostItems();
-            document.getElementById('profitReportCard').style.display = 'none'; // 新增成本後隱藏舊的利潤報告
+            try {
+                await addDoc(collection(db, "costs"), {
+                    name: name,
+                    amount: amount,
+                    timestamp: new Date().getTime()
+                });
+                document.getElementById('costItemName').value = '';
+                document.getElementById('costItemAmount').value = '';
+                document.getElementById('profitReportCard').style.display = 'none';
+            } catch(e) { alert("雲端新增成本失敗！", e); }
         }
 
-        function removeCostItem(id) {
+        window.removeCostItem = async function(cloudId) {
             if(confirm('確定要刪除此筆成本花費紀錄嗎？')) {
-                costItems = costItems.filter(item => item.id !== id);
-                localStorage.setItem('bazaar_costs4', JSON.stringify(costItems));
-                renderCostItems();
-                document.getElementById('profitReportCard').style.display = 'none';
+                try {
+                    await deleteDoc(doc(db, "costs", cloudId));
+                    document.getElementById('profitReportCard').style.display = 'none';
+                } catch(e) { alert("雲端刪除失敗", e); }
             }
         }
 
@@ -728,26 +806,22 @@
                     <tr>
                         <td><strong>${item.name}</strong></td>
                         <td style="color: var(--purple-cost); font-weight: bold;">NT$ ${item.amount}</td>
-                        <td><button style="color: var(--danger-red); background: none; border: none; cursor:pointer; text-decoration: underline; font-size: 0.8rem;" onclick="removeCostItem(${item.id})">刪除</button></td>
+                        <td><button style="color: var(--danger-red); background: none; border: none; cursor:pointer; text-decoration: underline; font-size: 0.8rem;" onclick="removeCostItem('${item.id}')">刪除</button></td>
                     </tr>
                 `;
             }).join('');
             document.getElementById('costTotalText').innerText = `成本花費總計：NT$ ${totalCost}`;
         }
 
-        function calculateProfit() {
-            // 計算實收總營業額 (僅計算已出餐完畢的訂單)
+        window.calculateProfit = function() {
             let totalRevenue = 0;
             orders.forEach(o => { if(o.status === 'completed') totalRevenue += o.totalPrice; });
 
-            // 計算總成本
             let totalCost = 0;
             costItems.forEach(item => totalCost += item.amount);
 
-            // 計算淨利潤
             let netProfit = totalRevenue - totalCost;
 
-            // 計算投資報酬率 ROI = (淨利潤 / 總成本) * 100
             let roiText = "0%";
             if(totalCost > 0) {
                 let roiValue = (netProfit / totalCost) * 100;
@@ -756,31 +830,31 @@
                 roiText = "無限大 (尚未投入任何成本)";
             }
 
-            // 渲染至介面
             document.getElementById('reportRevenue').innerText = `NT$ ${totalRevenue}`;
             document.getElementById('reportCost').innerText = `NT$ ${totalCost}`;
             
             const profitEl = document.getElementById('reportNetProfit');
             profitEl.innerText = `NT$ ${netProfit}`;
-            if(netProfit >= 0) {
-                profitEl.style.color = 'var(--success-green)';
-            } else {
-                profitEl.style.color = 'var(--danger-red)';
-            }
+            profitEl.style.color = netProfit >= 0 ? 'var(--success-green)' : 'var(--danger-red)';
 
             document.getElementById('reportROI').innerText = roiText;
             document.getElementById('profitReportCard').style.display = 'block';
         }
 
-        function saveData() {
-            localStorage.setItem('bazaar_orders4', JSON.stringify(orders));
-            localStorage.setItem('bazaar_next_number4', nextOrderNumber.toString());
-        }
-
-        function resetAllData() {
-            if(confirm('🚨 注意：確定要清空今天的全部銷售、排單、成本與折扣統計嗎？（無法復原）')) {
-                localStorage.removeItem('bazaar_orders4'); localStorage.removeItem('bazaar_next_number4'); localStorage.removeItem('bazaar_costs4');
-                orders = []; costItems = []; nextOrderNumber = 1; cart = {}; renderAll(); alert('數據已徹底重置！');
+        window.resetAllData = async function() {
+            if(confirm('🚨 警告：這將會【一鍵清空雲端資料庫】所有訂單與成本紀錄！確認要繼續嗎？')) {
+                try {
+                    const orderSnap = await getDocs(collection(db, "orders"));
+                    const costSnap = await getDocs(collection(db, "costs"));
+                    
+                    const batch = writeBatch(db);
+                    orderSnap.forEach(d => batch.delete(d.ref));
+                    costSnap.forEach(d => batch.delete(d.ref));
+                    
+                    await batch.commit();
+                    cart = {};
+                    alert('雲端資料已徹底清空！');
+                } catch(e) { alert("清空雲端失敗", e); }
             }
         }
     </script>
